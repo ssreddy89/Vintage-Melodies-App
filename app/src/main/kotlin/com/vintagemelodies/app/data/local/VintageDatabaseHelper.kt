@@ -16,7 +16,7 @@ class VintageDatabaseHelper(private val context: Context) :
 
     companion object {
         const val DATABASE_NAME = "vintage_melodies_standalone.db"
-        const val DATABASE_VERSION = 6
+        const val DATABASE_VERSION = 7
 
         const val TABLE_SONGS = "songs"
         const val TABLE_PLAYLISTS = "playlists"
@@ -71,7 +71,7 @@ class VintageDatabaseHelper(private val context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 6) {
+        if (oldVersion < 7) {
             try {
                 db.execSQL("ALTER TABLE $TABLE_SONGS ADD COLUMN year TEXT DEFAULT ''")
             } catch (_: Exception) {}

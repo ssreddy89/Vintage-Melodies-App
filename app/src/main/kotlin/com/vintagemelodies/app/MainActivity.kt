@@ -37,6 +37,7 @@ import com.bumptech.glide.Glide
 import com.vintagemelodies.app.data.model.CloudFolder
 import com.vintagemelodies.app.data.model.Playlist
 import com.vintagemelodies.app.data.model.Song
+import com.vintagemelodies.app.data.repository.CloudCatalogSyncManager
 import com.vintagemelodies.app.data.repository.MusicRepository
 import com.vintagemelodies.app.player.AudioPlayerManager
 import com.vintagemelodies.app.player.MusicPlaybackService
@@ -206,6 +207,9 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
         // Background update check
         AppUpdateManager.checkForUpdate(this, isManual = false)
+
+        // Background Cloud Catalog Sync
+        CloudCatalogSyncManager.syncFromCloud(this)
     }
 
     private fun requestNotificationPermission() {
@@ -562,7 +566,11 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         etSearchR2Songs.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(s: Editable?) {
                 val query = s?.toString()?.trim() ?: ""
-                val filtered = repository.getUnassignedSongs(folderFilter = activeCloudFolder, query = query)
+                val filtered = repository.getUnassignedSongs(
+                    folderFilter = activeCloudFolder,
+                    query = query,
+                    targetPlaylistId = activePlaylist?.id
+                )
                 r2PickerAdapter.updateData(filtered)
             }
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -1000,6 +1008,18 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private fun openR2Picker() {
         returnToFolderList()
         layoutR2Picker.visibility = View.VISIBLE
+        tvR2PickerSubtitle.text = "Syncing latest cloud folders & songs..."
+        CloudCatalogSyncManager.syncFromCloud(this) { success, _ ->
+            if (layoutR2Picker.visibility == View.VISIBLE && rvR2PickerFolders.visibility == View.VISIBLE) {
+                val updatedFolders = repository.getAvailableCloudFolders(activePlaylist?.id)
+                folderAdapter.updateData(updatedFolders)
+                tvR2PickerSubtitle.text = if (updatedFolders.isEmpty()) {
+                    "All cloud songs have already been added to this playlist!"
+                } else {
+                    "Select a folder to browse unadded cloud songs:"
+                }
+            }
+        }
     }
 
     private fun returnToFolderList() {
@@ -1008,11 +1028,11 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         tvR2PickerTitle.text = "☁️ Cloudflare R2 Folders"
         tvR2PickerSubtitle.text = "Select a folder to browse unadded cloud songs:"
 
-        val folders = repository.getAvailableCloudFolders()
+        val folders = repository.getAvailableCloudFolders(activePlaylist?.id)
         folderAdapter.updateData(folders)
 
         if (folders.isEmpty()) {
-            tvR2PickerSubtitle.text = "All cloud songs have already been added to playlists!"
+            tvR2PickerSubtitle.text = "All cloud songs have already been added to this playlist!"
         }
     }
 
@@ -1023,13 +1043,17 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         btnSelectAllFolderSongs.text = "Select All"
         etSearchR2Songs.setText("")
 
-        val songs = repository.getUnassignedSongs(folderFilter = folderName)
+        val songs = repository.getUnassignedSongs(
+            folderFilter = folderName,
+            targetPlaylistId = activePlaylist?.id
+        )
         r2PickerAdapter.updateData(songs)
 
+        val cleanName = CloudFolder(folderName).displayName
         rvR2PickerFolders.visibility = View.GONE
         layoutR2FolderSongs.visibility = View.VISIBLE
-        tvR2PickerTitle.text = "☁️ Cloud Folder: $folderName"
-        tvCurrentFolderName.text = folderName
+        tvR2PickerTitle.text = "☁️ Cloud Folder: $cleanName"
+        tvCurrentFolderName.text = cleanName
         btnConfirmAddSelected.text = "Add Selected to Playlist (0)"
     }
 

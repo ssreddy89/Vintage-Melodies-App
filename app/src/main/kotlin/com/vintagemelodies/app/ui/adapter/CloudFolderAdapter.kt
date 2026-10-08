@@ -25,8 +25,8 @@ class CloudFolderAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val folder = folders[position]
-        holder.name.text = "📁 ${folder.name}"
-        holder.count.text = "${folder.songCount} unadded song${if (folder.songCount == 1) "" else "s"}"
+        holder.name.text = "📁 ${folder.displayName}"
+        holder.count.text = "${folder.songCount} song${if (folder.songCount == 1) "" else "s"}"
 
         holder.itemView.setOnClickListener { onItemClick(folder) }
     }
@@ -34,7 +34,7 @@ class CloudFolderAdapter(
     override fun getItemCount(): Int = folders.size
 
     fun updateData(newFolders: List<CloudFolder>) {
-        this.folders = newFolders
+        this.folders = newFolders.sortedBy { it.displayName.lowercase() }
         notifyDataSetChanged()
     }
 }

@@ -154,19 +154,24 @@ class MusicRepository(private val context: Context) {
         return list
     }
 
-    fun getAvailableCloudFolders(): List<CloudFolder> {
+    fun getAvailableCloudFolders(targetPlaylistId: Long? = null): List<CloudFolder> {
         val db = dbHelper.readableDatabase
         val list = mutableListOf<CloudFolder>()
+
+        val whereClause = if (targetPlaylistId != null) {
+            "WHERE id NOT IN (SELECT song_id FROM ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS} WHERE playlist_id = ?)"
+        } else ""
+        val args = if (targetPlaylistId != null) arrayOf(targetPlaylistId.toString()) else null
 
         val cursor = db.rawQuery(
             """
             SELECT folder, COUNT(*) as song_count
             FROM ${VintageDatabaseHelper.TABLE_SONGS}
-            WHERE id NOT IN (SELECT DISTINCT song_id FROM ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS})
+            $whereClause
             GROUP BY folder
-            ORDER BY folder ASC
+            ORDER BY folder COLLATE NOCASE ASC
             """.trimIndent(),
-            null
+            args
         )
 
         cursor.use {
@@ -179,12 +184,21 @@ class MusicRepository(private val context: Context) {
         return list
     }
 
-    fun getUnassignedSongs(folderFilter: String = "", query: String = ""): List<Song> {
+    fun getUnassignedSongs(
+        folderFilter: String = "",
+        query: String = "",
+        targetPlaylistId: Long? = null
+    ): List<Song> {
         val db = dbHelper.readableDatabase
         val list = mutableListOf<Song>()
 
-        val whereClauses = mutableListOf("id NOT IN (SELECT DISTINCT song_id FROM ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS})")
+        val whereClauses = mutableListOf<String>()
         val args = mutableListOf<String>()
+
+        if (targetPlaylistId != null) {
+            whereClauses.add("id NOT IN (SELECT song_id FROM ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS} WHERE playlist_id = ?)")
+            args.add(targetPlaylistId.toString())
+        }
 
         if (folderFilter.isNotBlank()) {
             whereClauses.add("folder = ?")
@@ -198,7 +212,8 @@ class MusicRepository(private val context: Context) {
             args.add("%$query%")
         }
 
-        val sql = "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} WHERE ${whereClauses.joinToString(" AND ")} ORDER BY album COLLATE NOCASE ASC, year ASC, title COLLATE NOCASE ASC"
+        val whereSql = if (whereClauses.isNotEmpty()) "WHERE ${whereClauses.joinToString(" AND ")}" else ""
+        val sql = "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} $whereSql ORDER BY album COLLATE NOCASE ASC, year ASC, title COLLATE NOCASE ASC"
         val cursor = db.rawQuery(sql, if (args.isEmpty()) null else args.toTypedArray())
 
         cursor.use {
