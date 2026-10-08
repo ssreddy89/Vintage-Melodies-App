@@ -16,3 +16,5 @@
 *.jks
 keystore.properties
 local.properties
+extracted_covers/
+scripts/

@@ -41,21 +41,34 @@ class MusicPlaybackService : Service() {
         const val EXTRA_PLAYLIST_NAME = "extra_playlist_name"
         const val EXTRA_IS_PLAYING = "extra_is_playing"
         const val EXTRA_ART_RES = "extra_art_res"
+        const val EXTRA_ART_PATH = "extra_art_path"
 
         var serviceListener: ServiceActionListener? = null
+        var currentArtworkBitmap: android.graphics.Bitmap? = null
 
         fun updateNotification(
             context: Context,
             song: Song?,
             playlistName: String,
-            isPlaying: Boolean
+            isPlaying: Boolean,
+            customBitmap: android.graphics.Bitmap? = null,
+            artFilePath: String? = null
         ) {
+            currentArtworkBitmap = customBitmap
             val intent = Intent(context, MusicPlaybackService::class.java).apply {
                 putExtra(EXTRA_SONG_TITLE, song?.title ?: "Vintage Melodies")
-                putExtra(EXTRA_SONG_ARTIST, song?.artist ?: "Classic Music")
+                val subtitle = when {
+                    song?.year?.isNotBlank() == true -> "${song.artist} • ${song.year}"
+                    song?.album?.isNotBlank() == true && !song.album.startsWith("Folder:") && !song.album.startsWith("Cloudflare R2:") -> "${song.artist} • ${song.album}"
+                    else -> song?.artist ?: "Classic Music"
+                }
+                putExtra(EXTRA_SONG_ARTIST, subtitle)
                 putExtra(EXTRA_PLAYLIST_NAME, playlistName)
                 putExtra(EXTRA_IS_PLAYING, isPlaying)
                 putExtra(EXTRA_ART_RES, song?.artworkResId ?: R.drawable.ic_vintage_player_art_2)
+                if (artFilePath != null) {
+                    putExtra(EXTRA_ART_PATH, artFilePath)
+                }
             }
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -150,9 +163,18 @@ class MusicPlaybackService : Service() {
                 val playlist = intent?.getStringExtra(EXTRA_PLAYLIST_NAME) ?: "Playlist"
                 val isPlaying = intent?.getBooleanExtra(EXTRA_IS_PLAYING, false) ?: false
                 val artRes = intent?.getIntExtra(EXTRA_ART_RES, R.drawable.ic_vintage_player_art_2) ?: R.drawable.ic_vintage_player_art_2
+                val artPath = intent?.getStringExtra(EXTRA_ART_PATH)
 
-                updateMediaSessionState(title, artist, playlist, isPlaying, artRes)
-                val notification = buildNotification(title, artist, playlist, isPlaying, artRes)
+                val largeArt = currentArtworkBitmap
+                    ?: (artPath?.let { path -> try { BitmapFactory.decodeFile(path) } catch (_: Exception) { null } })
+                    ?: try {
+                        BitmapFactory.decodeResource(resources, if (artRes != 0) artRes else R.drawable.ic_vintage_player_art_2)
+                    } catch (e: Exception) {
+                        null
+                    }
+
+                updateMediaSessionState(title, artist, playlist, isPlaying, largeArt)
+                val notification = buildNotification(title, artist, playlist, isPlaying, largeArt)
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     startForeground(
@@ -173,7 +195,7 @@ class MusicPlaybackService : Service() {
         artist: String,
         playlist: String,
         isPlaying: Boolean,
-        artRes: Int
+        largeArt: android.graphics.Bitmap?
     ) {
         val state = if (isPlaying) PlaybackStateCompat.STATE_PLAYING else PlaybackStateCompat.STATE_PAUSED
         val playbackState = PlaybackStateCompat.Builder()
@@ -189,12 +211,6 @@ class MusicPlaybackService : Service() {
             .build()
 
         mediaSession?.setPlaybackState(playbackState)
-
-        val largeArt = try {
-            BitmapFactory.decodeResource(resources, if (artRes != 0) artRes else R.drawable.ic_vintage_player_art_2)
-        } catch (e: Exception) {
-            null
-        }
 
         val metadataBuilder = MediaMetadataCompat.Builder()
             .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
@@ -234,7 +250,7 @@ class MusicPlaybackService : Service() {
         artist: String,
         playlist: String,
         isPlaying: Boolean,
-        artRes: Int
+        largeArt: android.graphics.Bitmap?
     ): Notification {
         val openAppIntent = Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
@@ -257,12 +273,6 @@ class MusicPlaybackService : Service() {
         // Next Action
         val nextIntent = Intent(this, MusicPlaybackService::class.java).apply { action = ACTION_NEXT }
         val nextPending = PendingIntent.getService(this, 3, nextIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-
-        val largeArt = try {
-            BitmapFactory.decodeResource(resources, if (artRes != 0) artRes else R.drawable.ic_vintage_player_art_2)
-        } catch (e: Exception) {
-            null
-        }
 
         val playPauseIcon = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow
 
@@ -291,6 +301,7 @@ class MusicPlaybackService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
+        currentArtworkBitmap = null
         mediaSession?.apply {
             isActive = false
             release()

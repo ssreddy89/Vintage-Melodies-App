@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="16dp"
+    android:paddingStart="14dp"
     android:paddingTop="8dp"
     android:paddingEnd="16dp"
     android:paddingBottom="8dp"
@@ -16,31 +17,53 @@
         android:layout_height="wrap_content"
         android:buttonTint="@color/amber_accent" />
 
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/picker_song_art"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="8dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_vintage_player_art_2"
+        app:shapeAppearanceOverlay="@style/RoundedImageCorner12" />
+
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="12dp"
         android:orientation="vertical">
 
         <TextView
             android:id="@+id/picker_song_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Song Title"
             android:textColor="@color/text_primary"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:singleLine="true" />
+            android:maxLines="1"
+            android:ellipsize="end" />
 
         <TextView
             android:id="@+id/picker_song_artist"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="1dp"
             android:text="Folder / Artist"
             android:textColor="@color/text_muted"
             android:textSize="12sp"
-            android:singleLine="true" />
+            android:maxLines="1"
+            android:ellipsize="end" />
+
+        <TextView
+            android:id="@+id/picker_song_meta"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="💽 Album • 📅 Year"
+            android:textColor="@color/amber_accent"
+            android:textSize="11sp"
+            android:maxLines="1"
+            android:ellipsize="end" />
     </LinearLayout>
 </LinearLayout>

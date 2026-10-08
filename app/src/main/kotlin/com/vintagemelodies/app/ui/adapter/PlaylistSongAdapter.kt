@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide
 import com.vintagemelodies.app.R
 import com.vintagemelodies.app.data.model.Song
+import com.vintagemelodies.app.player.SongArtworkHelper
 
 class PlaylistSongAdapter(
     private var songs: List<Song>,
@@ -31,13 +31,17 @@ class PlaylistSongAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val song = songs[position]
         holder.title.text = song.title
-        holder.artist.text = song.artist
+        
+        // Show artist with release year or album if available
+        val subtitle = when {
+            song.year.isNotBlank() && song.artist.isNotBlank() -> "${song.artist} • ${song.year}"
+            song.album.isNotBlank() && !song.album.startsWith("Folder:") && !song.album.startsWith("Cloudflare R2:") -> "${song.artist} • ${song.album}"
+            else -> song.artist
+        }
+        holder.artist.text = subtitle
 
-        val artRes = if (song.artworkResId != 0) song.artworkResId else R.drawable.ic_vintage_player_art_2
-        Glide.with(holder.art.context)
-            .load(artRes)
-            .centerCrop()
-            .into(holder.art)
+        // Load true artwork
+        SongArtworkHelper.loadSongArt(holder.art, song)
 
         holder.itemView.setOnClickListener { onItemClick(song, position) }
         holder.itemView.setOnLongClickListener {

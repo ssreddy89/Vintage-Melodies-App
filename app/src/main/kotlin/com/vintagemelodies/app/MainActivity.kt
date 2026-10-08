@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
@@ -39,6 +40,7 @@ import com.vintagemelodies.app.data.model.Song
 import com.vintagemelodies.app.data.repository.MusicRepository
 import com.vintagemelodies.app.player.AudioPlayerManager
 import com.vintagemelodies.app.player.MusicPlaybackService
+import com.vintagemelodies.app.player.SongArtworkHelper
 import com.vintagemelodies.app.ui.adapter.CloudFolderAdapter
 import com.vintagemelodies.app.ui.adapter.DrawerPlaylistAdapter
 import com.vintagemelodies.app.ui.adapter.MoodPlaylistAdapter
@@ -1152,17 +1154,36 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
     // ── Audio Playback Callbacks & Notification Updates (Item 6) ───────────
 
+    private var currentSongArtBitmap: Bitmap? = null
+    private var currentSongArtPath: String? = null
+
     override fun onSongChanged(song: Song) {
         tvPlayerTitle.text = song.title
         val playlistInfo = playingPlaylist?.let { "${it.name} • " } ?: ""
-        tvPlayerArtist.text = "$playlistInfo${song.artist}"
+        val songInfo = when {
+            song.year.isNotBlank() && song.artist.isNotBlank() -> "${song.artist} (${song.year})"
+            song.album.isNotBlank() && !song.album.startsWith("Folder:") && !song.album.startsWith("Cloudflare R2:") -> "${song.artist} • ${song.album}"
+            else -> song.artist
+        }
+        tvPlayerArtist.text = "$playlistInfo$songInfo"
 
-        // Update player card art
-        val artRes = if (song.artworkResId != 0) song.artworkResId else R.drawable.ic_vintage_player_art_2
-        Glide.with(this)
-            .load(artRes)
-            .centerCrop()
-            .into(ivPlayerArt)
+        currentSongArtBitmap = null
+        currentSongArtPath = null
+
+        // Load true artwork (Memory -> Disk -> Remote Url -> Embedded MP3 Extraction -> Fallback)
+        SongArtworkHelper.loadSongArt(ivPlayerArt, song) { bitmap, filePath ->
+            currentSongArtBitmap = bitmap
+            currentSongArtPath = filePath
+            // Update notification and MediaSession with true album art
+            MusicPlaybackService.updateNotification(
+                this,
+                song,
+                playingPlaylist?.name ?: "Vintage Melodies",
+                true,
+                customBitmap = bitmap,
+                artFilePath = filePath
+            )
+        }
 
         // Update app background
         playingPlaylist?.let { pl ->
@@ -1171,7 +1192,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
         btnPlayPause.setImageResource(R.drawable.ic_pause)
 
-        // Update Media Playback Notification (Item 6)
+        // Initial notification update
         MusicPlaybackService.updateNotification(
             this,
             song,
@@ -1188,7 +1209,9 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
             this,
             playerManager.getCurrentSong(),
             playingPlaylist?.name ?: "Vintage Melodies",
-            isPlaying
+            isPlaying,
+            customBitmap = currentSongArtBitmap,
+            artFilePath = currentSongArtPath
         )
     }
 

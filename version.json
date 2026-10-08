@@ -1,8 +1,8 @@
 {
-  "versionCode": 3,
-  "versionName": "1.0.2",
+  "versionCode": 4,
+  "versionName": "1.0.3",
   "apkUrl": "https://pub-e7f4f743d98b43b89671fe068ee1ee05.r2.dev/apk/Vintage-Melodies-v1.apk",
-  "changelog": "Mandatory Update: Fixed playlist back button overlap, replaced heart icon with playlist folder action, enlarged player buttons for easy tapping, and instant player start response.",
+  "changelog": "Mandatory Update: Added embedded album cover art extraction for player and notification, and Album & Release Year details when picking and adding songs to playlists.",
   "forceUpdate": true,
-  "minVersionCode": 3
+  "minVersionCode": 4
 }

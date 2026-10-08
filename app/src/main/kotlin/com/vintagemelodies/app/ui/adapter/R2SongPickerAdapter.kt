@@ -4,10 +4,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
+import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.vintagemelodies.app.R
 import com.vintagemelodies.app.data.model.Song
+import com.vintagemelodies.app.player.SongArtworkHelper
 
 class R2SongPickerAdapter(
     private var songs: List<Song>,
@@ -17,8 +19,10 @@ class R2SongPickerAdapter(
 
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val cb: CheckBox = view.findViewById(R.id.cb_select_song)
+        val art: ImageView = view.findViewById(R.id.picker_song_art)
         val title: TextView = view.findViewById(R.id.picker_song_title)
         val artist: TextView = view.findViewById(R.id.picker_song_artist)
+        val meta: TextView = view.findViewById(R.id.picker_song_meta)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -31,6 +35,25 @@ class R2SongPickerAdapter(
         holder.title.text = song.title
         holder.artist.text = song.artist
         holder.cb.isChecked = selectedIds.contains(song.id)
+
+        // Album & Year Display
+        val metaParts = mutableListOf<String>()
+        if (song.album.isNotBlank() && !song.album.startsWith("Folder:") && !song.album.startsWith("Cloudflare R2:")) {
+            metaParts.add("💽 ${song.album}")
+        }
+        if (song.year.isNotBlank()) {
+            metaParts.add("📅 ${song.year}")
+        }
+
+        if (metaParts.isNotEmpty()) {
+            holder.meta.visibility = View.VISIBLE
+            holder.meta.text = metaParts.joinToString("  •  ")
+        } else {
+            holder.meta.visibility = View.GONE
+        }
+
+        // Load Album Artwork (Memory Cache -> Disk -> Remote URL -> Embedded APIC)
+        SongArtworkHelper.loadSongArt(holder.art, song)
 
         val toggle = {
             if (selectedIds.contains(song.id)) {

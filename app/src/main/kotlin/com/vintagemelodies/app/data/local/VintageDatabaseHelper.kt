@@ -16,7 +16,7 @@ class VintageDatabaseHelper(private val context: Context) :
 
     companion object {
         const val DATABASE_NAME = "vintage_melodies_standalone.db"
-        const val DATABASE_VERSION = 5
+        const val DATABASE_VERSION = 6
 
         const val TABLE_SONGS = "songs"
         const val TABLE_PLAYLISTS = "playlists"
@@ -32,9 +32,11 @@ class VintageDatabaseHelper(private val context: Context) :
                 artist TEXT,
                 folder TEXT,
                 album TEXT,
+                year TEXT DEFAULT '',
                 duration INTEGER DEFAULT 0,
                 media_url TEXT NOT NULL,
-                artwork_res_id INTEGER DEFAULT 0
+                artwork_res_id INTEGER DEFAULT 0,
+                artwork_url TEXT DEFAULT ''
             )
             """.trimIndent()
         )
@@ -69,10 +71,68 @@ class VintageDatabaseHelper(private val context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_PLAYLIST_SONGS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_PLAYLISTS")
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_SONGS")
-        onCreate(db)
+        if (oldVersion < 6) {
+            try {
+                db.execSQL("ALTER TABLE $TABLE_SONGS ADD COLUMN year TEXT DEFAULT ''")
+            } catch (_: Exception) {}
+            try {
+                db.execSQL("ALTER TABLE $TABLE_SONGS ADD COLUMN artwork_url TEXT DEFAULT ''")
+            } catch (_: Exception) {}
+            preSeedSongsOnly(db)
+        } else {
+            db.execSQL("DROP TABLE IF EXISTS $TABLE_PLAYLIST_SONGS")
+            db.execSQL("DROP TABLE IF EXISTS $TABLE_PLAYLISTS")
+            db.execSQL("DROP TABLE IF EXISTS $TABLE_SONGS")
+            onCreate(db)
+        }
+    }
+
+    private fun preSeedSongsOnly(db: SQLiteDatabase) {
+        try {
+            val jsonString = context.assets.open("r2_songs.json").bufferedReader().use { it.readText() }
+            val root = JSONObject(jsonString)
+            val songsArray = root.optJSONArray("songs") ?: return
+
+            val artworks = listOf(
+                R.drawable.ic_vintage_player_art_2,
+                R.drawable.ic_vintage_player_art_3,
+                R.drawable.vm_gif_kitchen,
+                R.drawable.vm_gif_tailoring,
+                R.drawable.vm_gif_roadtrip,
+                R.drawable.vm_art_monsoon,
+                R.drawable.vm_art_sunset,
+                R.drawable.vm_art_classic
+            )
+
+            for (i in 0 until songsArray.length()) {
+                val songObj = songsArray.getJSONObject(i)
+                val id = songObj.optString("id", "song_$i")
+                val title = songObj.optString("title", "Untitled")
+                val artist = songObj.optString("artist", "Vintage Melodies")
+                val folder = songObj.optString("folder", "Songs")
+                val album = songObj.optString("album", "Cloudflare R2: $folder")
+                val year = songObj.optString("year", "")
+                val mediaUrl = songObj.optString("audio_url", songObj.optString("media_url", ""))
+                val artworkUrl = songObj.optString("artwork_url", "")
+                val artResId = artworks[i % artworks.size]
+
+                val cv = ContentValues().apply {
+                    put("id", id)
+                    put("title", title)
+                    put("artist", artist)
+                    put("folder", folder)
+                    put("album", album)
+                    put("year", year)
+                    put("duration", 0)
+                    put("media_url", mediaUrl)
+                    put("artwork_res_id", artResId)
+                    put("artwork_url", artworkUrl)
+                }
+                db.insertWithOnConflict(TABLE_SONGS, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     private fun preSeedData(db: SQLiteDatabase) {
@@ -101,7 +161,10 @@ class VintageDatabaseHelper(private val context: Context) :
                 val title = songObj.optString("title", "Untitled")
                 val artist = songObj.optString("artist", "Vintage Melodies")
                 val folder = songObj.optString("folder", "Songs")
+                val album = songObj.optString("album", "Cloudflare R2: $folder")
+                val year = songObj.optString("year", "")
                 val mediaUrl = songObj.optString("audio_url", songObj.optString("media_url", ""))
+                val artworkUrl = songObj.optString("artwork_url", "")
                 val artResId = artworks[i % artworks.size]
 
                 val cv = ContentValues().apply {
@@ -109,10 +172,12 @@ class VintageDatabaseHelper(private val context: Context) :
                     put("title", title)
                     put("artist", artist)
                     put("folder", folder)
-                    put("album", "Cloudflare R2: $folder")
+                    put("album", album)
+                    put("year", year)
                     put("duration", 0)
                     put("media_url", mediaUrl)
                     put("artwork_res_id", artResId)
+                    put("artwork_url", artworkUrl)
                 }
                 db.insertWithOnConflict(TABLE_SONGS, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
                 songIds.add(id)

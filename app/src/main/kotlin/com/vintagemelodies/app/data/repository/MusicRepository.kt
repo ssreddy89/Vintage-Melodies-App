@@ -90,7 +90,7 @@ class MusicRepository(private val context: Context) {
 
         val cursor = db.rawQuery(
             """
-            SELECT s.id, s.title, s.artist, s.folder, s.album, s.duration, s.media_url, s.artwork_res_id
+            SELECT s.id, s.title, s.artist, s.folder, s.album, s.duration, s.media_url, s.artwork_res_id, s.year, s.artwork_url
             FROM ${VintageDatabaseHelper.TABLE_SONGS} s
             INNER JOIN ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS} ps ON s.id = ps.song_id
             WHERE ps.playlist_id = ?
@@ -107,10 +107,12 @@ class MusicRepository(private val context: Context) {
                         title = it.getString(1),
                         artist = it.getString(2),
                         folder = it.getString(3),
-                        album = it.getString(4),
+                        album = it.getString(4) ?: "",
                         duration = it.getLong(5),
                         mediaUrl = it.getString(6),
-                        artworkResId = it.getInt(7)
+                        artworkResId = it.getInt(7),
+                        year = it.getString(8) ?: "",
+                        artworkUrl = it.getString(9) ?: ""
                     )
                 )
             }
@@ -123,12 +125,12 @@ class MusicRepository(private val context: Context) {
         val list = mutableListOf<Song>()
 
         val query = if (filter.isBlank()) {
-            "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id FROM ${VintageDatabaseHelper.TABLE_SONGS} ORDER BY title ASC"
+            "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} ORDER BY title ASC"
         } else {
-            "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id FROM ${VintageDatabaseHelper.TABLE_SONGS} WHERE title LIKE ? OR artist LIKE ? OR folder LIKE ? ORDER BY title ASC"
+            "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} WHERE title LIKE ? OR artist LIKE ? OR folder LIKE ? OR album LIKE ? ORDER BY title ASC"
         }
 
-        val args = if (filter.isBlank()) null else arrayOf("%$filter%", "%$filter%", "%$filter%")
+        val args = if (filter.isBlank()) null else arrayOf("%$filter%", "%$filter%", "%$filter%", "%$filter%")
         val cursor = db.rawQuery(query, args)
 
         cursor.use {
@@ -139,10 +141,12 @@ class MusicRepository(private val context: Context) {
                         title = it.getString(1),
                         artist = it.getString(2),
                         folder = it.getString(3),
-                        album = it.getString(4),
+                        album = it.getString(4) ?: "",
                         duration = it.getLong(5),
                         mediaUrl = it.getString(6),
-                        artworkResId = it.getInt(7)
+                        artworkResId = it.getInt(7),
+                        year = it.getString(8) ?: "",
+                        artworkUrl = it.getString(9) ?: ""
                     )
                 )
             }
@@ -188,12 +192,13 @@ class MusicRepository(private val context: Context) {
         }
 
         if (query.isNotBlank()) {
-            whereClauses.add("(title LIKE ? OR artist LIKE ?)")
+            whereClauses.add("(title LIKE ? OR artist LIKE ? OR album LIKE ?)")
+            args.add("%$query%")
             args.add("%$query%")
             args.add("%$query%")
         }
 
-        val sql = "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id FROM ${VintageDatabaseHelper.TABLE_SONGS} WHERE ${whereClauses.joinToString(" AND ")} ORDER BY title ASC"
+        val sql = "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} WHERE ${whereClauses.joinToString(" AND ")} ORDER BY title ASC"
         val cursor = db.rawQuery(sql, if (args.isEmpty()) null else args.toTypedArray())
 
         cursor.use {
@@ -204,15 +209,31 @@ class MusicRepository(private val context: Context) {
                         title = it.getString(1),
                         artist = it.getString(2),
                         folder = it.getString(3),
-                        album = it.getString(4),
+                        album = it.getString(4) ?: "",
                         duration = it.getLong(5),
                         mediaUrl = it.getString(6),
-                        artworkResId = it.getInt(7)
+                        artworkResId = it.getInt(7),
+                        year = it.getString(8) ?: "",
+                        artworkUrl = it.getString(9) ?: ""
                     )
                 )
             }
         }
         return list
+    }
+
+    fun saveSongMetadata(songId: String, album: String = "", year: String = "", artworkUrl: String = "") {
+        try {
+            val db = dbHelper.writableDatabase
+            val cv = android.content.ContentValues().apply {
+                if (album.isNotBlank()) put("album", album)
+                if (year.isNotBlank()) put("year", year)
+                if (artworkUrl.isNotBlank()) put("artwork_url", artworkUrl)
+            }
+            if (cv.size() > 0) {
+                db.update(VintageDatabaseHelper.TABLE_SONGS, cv, "id = ?", arrayOf(songId))
+            }
+        } catch (_: Exception) {}
     }
 
     // ── Playlist Management & Persistence (Items 1, 2, 3) ───────────────────
