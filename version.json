@@ -1,8 +1,8 @@
 {
-  "versionCode": 1,
-  "versionName": "1.0.0",
-  "apkUrl": "https://github.com/ssreddy89/Vintage-Melodies-App/releases/latest/download/app-debug.apk",
-  "changelog": "Initial stable release with persistent playlists, central DB sync, notification player, and smooth audio streaming.",
-  "forceUpdate": false,
-  "minVersionCode": 1
+  "versionCode": 2,
+  "versionName": "1.0.1",
+  "apkUrl": "https://pub-e7f4f743d98b43b89671fe068ee1ee05.r2.dev/apk/Vintage-Melodies-v1.apk",
+  "changelog": "Mandatory Update: System notification player, Bluetooth & headset earbud gesture controls, background scroll opacity, and separated playlists.",
+  "forceUpdate": true,
+  "minVersionCode": 2
 }
