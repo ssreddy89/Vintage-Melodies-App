@@ -56,7 +56,7 @@ class PlaylistSongAdapter(
     override fun getItemCount(): Int = songs.size
 
     fun updateData(newSongs: List<Song>) {
-        this.songs = newSongs
+        this.songs = newSongs.sortedBy { it.title.lowercase() }
         notifyDataSetChanged()
     }
 }

@@ -35,4 +35,6 @@
     <color name="neon_player_card_bg">#8014200E</color>
     <color name="admin_badge_green">#00E676</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="player_focus_cyan">#FF4CAAD3</color>
+    <color name="player_ripple_cyan">#664CAAD3</color>
 </resources>

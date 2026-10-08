@@ -1,8 +1,8 @@
 {
-  "versionCode": 4,
-  "versionName": "1.0.3",
+  "versionCode": 5,
+  "versionName": "1.0.4",
   "apkUrl": "https://pub-e7f4f743d98b43b89671fe068ee1ee05.r2.dev/apk/Vintage-Melodies-v1.apk",
-  "changelog": "Mandatory Update: Added embedded album cover art extraction for player and notification, and Album & Release Year details when picking and adding songs to playlists.",
+  "changelog": "Mandatory Update: Cyan button focus color (#4caad3) on player, alphabetical sorting by song name in all playlists, album and year sorting in song picker, and classical Telugu font styling for మధుర గీతాలు.",
   "forceUpdate": true,
-  "minVersionCode": 4
+  "minVersionCode": 5
 }

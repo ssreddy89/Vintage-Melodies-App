@@ -94,7 +94,7 @@ class MusicRepository(private val context: Context) {
             FROM ${VintageDatabaseHelper.TABLE_SONGS} s
             INNER JOIN ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS} ps ON s.id = ps.song_id
             WHERE ps.playlist_id = ?
-            ORDER BY ps.sort_order ASC
+            ORDER BY s.title COLLATE NOCASE ASC
             """.trimIndent(),
             arrayOf(playlistId.toString())
         )
@@ -125,9 +125,9 @@ class MusicRepository(private val context: Context) {
         val list = mutableListOf<Song>()
 
         val query = if (filter.isBlank()) {
-            "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} ORDER BY title ASC"
+            "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} ORDER BY album COLLATE NOCASE ASC, year ASC, title COLLATE NOCASE ASC"
         } else {
-            "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} WHERE title LIKE ? OR artist LIKE ? OR folder LIKE ? OR album LIKE ? ORDER BY title ASC"
+            "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} WHERE title LIKE ? OR artist LIKE ? OR folder LIKE ? OR album LIKE ? ORDER BY album COLLATE NOCASE ASC, year ASC, title COLLATE NOCASE ASC"
         }
 
         val args = if (filter.isBlank()) null else arrayOf("%$filter%", "%$filter%", "%$filter%", "%$filter%")
@@ -198,7 +198,7 @@ class MusicRepository(private val context: Context) {
             args.add("%$query%")
         }
 
-        val sql = "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} WHERE ${whereClauses.joinToString(" AND ")} ORDER BY title ASC"
+        val sql = "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} WHERE ${whereClauses.joinToString(" AND ")} ORDER BY album COLLATE NOCASE ASC, year ASC, title COLLATE NOCASE ASC"
         val cursor = db.rawQuery(sql, if (args.isEmpty()) null else args.toTypedArray())
 
         cursor.use {

@@ -6,6 +6,8 @@
         <item name="colorPrimaryContainer">@color/card_background</item>
         <item name="colorOnPrimary">@color/text_primary</item>
         <item name="colorSecondary">@color/warm_gold</item>
+        <item name="colorControlHighlight">@color/player_ripple_cyan</item>
+        <item name="colorControlActivated">@color/player_focus_cyan</item>
         <item name="android:statusBarColor">@color/dark_espresso</item>
         <item name="android:navigationBarColor">@color/dark_espresso</item>
         <item name="android:windowBackground">@color/dark_background</item>

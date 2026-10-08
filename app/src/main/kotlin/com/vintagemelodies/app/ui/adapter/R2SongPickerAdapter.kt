@@ -72,7 +72,13 @@ class R2SongPickerAdapter(
     override fun getItemCount(): Int = songs.size
 
     fun updateData(newSongs: List<Song>) {
-        this.songs = newSongs
+        this.songs = newSongs.sortedWith(
+            compareBy(
+                { it.album.ifBlank { "zzz" }.lowercase() },
+                { it.year.ifBlank { "9999" } },
+                { it.title.lowercase() }
+            )
+        )
         notifyDataSetChanged()
     }
 

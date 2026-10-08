@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ripple xmlns:android="http://schemas.android.com/apk/res/android"
     android:color="@color/player_ripple_cyan">
-    <item>
+    <item android:id="@android:id/mask">
         <shape android:shape="oval">
-            <solid android:color="#26FFFFFF" />
-            <stroke
-                android:width="2dp"
-                android:color="#FFFFFFFF" />
+            <solid android:color="@color/player_focus_cyan" />
         </shape>
     </item>
 </ripple>
