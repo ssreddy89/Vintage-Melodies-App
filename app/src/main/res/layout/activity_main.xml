@@ -461,6 +461,27 @@
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
+            <!-- Admin Sync to Cloud Button -->
+            <Button
+                android:id="@+id/btn_admin_sync_cloud"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="36dp"
+                android:layout_toStartOf="@id/btn_admin_create_playlist"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_retry_button"
+                android:text="☁️ Sync Cloud"
+                android:textColor="@color/amber_light"
+                android:textSize="12sp"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:includeFontPadding="false"
+                android:textAllCaps="false"
+                android:visibility="gone" />
+
             <!-- Admin New Playlist Button -->
             <Button
                 android:id="@+id/btn_admin_create_playlist"

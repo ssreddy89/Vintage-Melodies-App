@@ -38,6 +38,7 @@ import com.vintagemelodies.app.data.model.CloudFolder
 import com.vintagemelodies.app.data.model.Playlist
 import com.vintagemelodies.app.data.model.Song
 import com.vintagemelodies.app.data.repository.CloudCatalogSyncManager
+import com.vintagemelodies.app.data.repository.CloudPlaylistSyncManager
 import com.vintagemelodies.app.data.repository.MusicRepository
 import com.vintagemelodies.app.player.AudioPlayerManager
 import com.vintagemelodies.app.player.MusicPlaybackService
@@ -122,6 +123,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private lateinit var drawerAdapter: DrawerPlaylistAdapter
     private lateinit var btnCloseDrawer: ImageButton
     private lateinit var btnAdminCreatePlaylist: Button
+    private lateinit var btnAdminSyncCloud: Button
 
     // Playlist Songs View
     private lateinit var layoutPlaylistSongsView: LinearLayout
@@ -210,6 +212,13 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
         // Background Cloud Catalog Sync
         CloudCatalogSyncManager.syncFromCloud(this)
+
+        // Central Cloud Shared Playlists Sync
+        CloudPlaylistSyncManager.fetchAndSyncFromCloud(this, repository) { success, count ->
+            if (success && count > 0) {
+                refreshPlaylists()
+            }
+        }
     }
 
     private fun requestNotificationPermission() {
@@ -346,6 +355,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         layoutDrawerPlaylists = findViewById(R.id.layout_drawer_playlists)
         btnCloseDrawer = findViewById(R.id.btn_close_drawer)
         btnAdminCreatePlaylist = findViewById(R.id.btn_admin_create_playlist)
+        btnAdminSyncCloud = findViewById(R.id.btn_admin_sync_cloud)
         rvDrawerPlaylists = findViewById(R.id.rv_drawer_playlists)
         rvDrawerPlaylists.layoutManager = LinearLayoutManager(this)
         drawerAdapter = DrawerPlaylistAdapter(
@@ -530,6 +540,16 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         }
 
         btnAdminCreatePlaylist.setOnClickListener { showCreateOrEditPlaylistDialog(existingPlaylist = null) }
+        btnAdminSyncCloud.setOnClickListener {
+            Toast.makeText(this, "Publishing playlists to cloud...", Toast.LENGTH_SHORT).show()
+            CloudPlaylistSyncManager.publishPlaylistsToCloud(this, repository) { success, msg ->
+                if (success) {
+                    Toast.makeText(this, "☁️ Success: All devices will now see your playlists!", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(this, "⚠️ Failed to sync cloud: $msg", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
         btnAdminAddR2Songs.setOnClickListener { openR2Picker() }
         btnCloseR2Picker.setOnClickListener { layoutR2Picker.visibility = View.GONE }
 
@@ -562,6 +582,9 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
                     returnToFolderList()
                     layoutR2Picker.visibility = View.GONE
                     openPlaylist(pl)
+                    if (isAdmin) {
+                        CloudPlaylistSyncManager.publishPlaylistsToCloud(this, repository)
+                    }
                 } else {
                     Toast.makeText(this, "Select at least one song", Toast.LENGTH_SHORT).show()
                 }
@@ -685,6 +708,11 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private fun openDrawer() {
         refreshPlaylists()
         layoutDrawerPlaylists.visibility = View.VISIBLE
+        CloudPlaylistSyncManager.fetchAndSyncFromCloud(this, repository) { success, count ->
+            if (success && count > 0) {
+                refreshPlaylists()
+            }
+        }
     }
 
     private fun openPlaylist(playlist: Playlist) {
@@ -906,6 +934,9 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
             }
 
             refreshPlaylists()
+            if (isAdmin) {
+                CloudPlaylistSyncManager.publishPlaylistsToCloud(this, repository)
+            }
             dialog.dismiss()
         }
 
@@ -964,6 +995,9 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
             repository.removeSongFromPlaylist(pl.id, song.id)
             openPlaylist(pl)
             refreshPlaylists()
+            if (isAdmin) {
+                CloudPlaylistSyncManager.publishPlaylistsToCloud(this, repository)
+            }
             Toast.makeText(this, "Removed '${song.title}' from '${pl.name}'", Toast.LENGTH_SHORT).show()
         } ?: run {
             Toast.makeText(this, "No active playlist selected", Toast.LENGTH_SHORT).show()
@@ -995,11 +1029,17 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
                         repository.moveSongToPlaylist(curPl.id, targetPl.id, song.id)
                         openPlaylist(curPl)
                         refreshPlaylists()
+                        if (isAdmin) {
+                            CloudPlaylistSyncManager.publishPlaylistsToCloud(this, repository)
+                        }
                         Toast.makeText(this, "Moved '${song.title}' to '${targetPl.name}'", Toast.LENGTH_SHORT).show()
                     }
                 } else {
                     repository.copySongToPlaylist(targetPl.id, song.id)
                     refreshPlaylists()
+                    if (isAdmin) {
+                        CloudPlaylistSyncManager.publishPlaylistsToCloud(this, repository)
+                    }
                     Toast.makeText(this, "Copied '${song.title}' to '${targetPl.name}'", Toast.LENGTH_SHORT).show()
                 }
             }
@@ -1084,6 +1124,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         tvTopAdminBadge.visibility = if (isAdmin) View.VISIBLE else View.GONE
         btnTopAdmin.setColorFilter(if (isAdmin) getColor(R.color.amber_accent) else getColor(R.color.text_primary))
         btnAdminCreatePlaylist.visibility = if (isAdmin) View.VISIBLE else View.GONE
+        btnAdminSyncCloud.visibility = if (isAdmin) View.VISIBLE else View.GONE
         layoutAdminPlaylistBar.visibility = if (isAdmin && layoutPlaylistSongsView.visibility == View.VISIBLE) View.VISIBLE else View.GONE
     }
 
@@ -1095,6 +1136,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private fun showAdminMenu() {
         val options = arrayOf(
             "➕ Create New Playlist",
+            "☁️ Publish All Playlists to Cloud",
             "🌐 Configure Languages",
             "🔄 Check for App Updates",
             "🔓 Log Out Admin"
@@ -1104,9 +1146,19 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
             .setItems(options) { _, which ->
                 when (which) {
                     0 -> showCreateOrEditPlaylistDialog(existingPlaylist = null)
-                    1 -> showLanguageSelectionDialog(isFirstTime = false)
-                    2 -> AppUpdateManager.checkForUpdate(this, isManual = true)
-                    3 -> {
+                    1 -> {
+                        Toast.makeText(this, "Publishing playlists to cloud...", Toast.LENGTH_SHORT).show()
+                        CloudPlaylistSyncManager.publishPlaylistsToCloud(this, repository) { success, msg ->
+                            if (success) {
+                                Toast.makeText(this, "☁️ Success: All devices will now see these playlists!", Toast.LENGTH_LONG).show()
+                            } else {
+                                Toast.makeText(this, "⚠️ Failed: $msg", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    }
+                    2 -> showLanguageSelectionDialog(isFirstTime = false)
+                    3 -> AppUpdateManager.checkForUpdate(this, isManual = true)
+                    4 -> {
                         isAdmin = false
                         getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putBoolean(KEY_IS_ADMIN, false).apply()
                         updateAdminUi()
@@ -1134,6 +1186,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
                     1 -> {
                         repository.copyPlaylist(playlist.id)
                         refreshPlaylists()
+                        if (isAdmin) CloudPlaylistSyncManager.publishPlaylistsToCloud(this, repository)
                         Toast.makeText(this, "Copied '${playlist.name}'", Toast.LENGTH_SHORT).show()
                     }
                     2 -> {
@@ -1150,6 +1203,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
                                     layoutPlaylistSongsView.visibility = View.GONE
                                 }
                                 refreshPlaylists()
+                                if (isAdmin) CloudPlaylistSyncManager.publishPlaylistsToCloud(this, repository)
                                 Toast.makeText(this, "Deleted '${playlist.name}'", Toast.LENGTH_SHORT).show()
                             }
                             .setNegativeButton("Cancel", null)

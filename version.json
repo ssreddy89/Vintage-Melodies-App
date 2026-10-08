@@ -1,8 +1,8 @@
 {
-  "versionCode": 7,
-  "versionName": "1.0.6",
+  "versionCode": 8,
+  "versionName": "1.0.7",
   "apkUrl": "https://pub-e7f4f743d98b43b89671fe068ee1ee05.r2.dev/apk/Vintage-Melodies-v1.apk",
-  "changelog": "Mandatory Update v1.0.6: Fixed cloud folder remaining count and song visibility when adding to playlists, eliminated SQLite cascade delete bug on cloud sync, and restored automatic folder refresh.",
+  "changelog": "Mandatory Update v1.0.7: Central Cloud Playlist Sync enabled! Playlists created, edited, or deleted by Admins now automatically synchronize across all devices. Common users always see and listen to the master playlists.",
   "forceUpdate": true,
-  "minVersionCode": 7
+  "minVersionCode": 8
 }
