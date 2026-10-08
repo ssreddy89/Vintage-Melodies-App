@@ -402,46 +402,4 @@ class MusicRepository(private val context: Context) {
             e.printStackTrace()
         }
     }
-
-    /**
-     * Syncs playlists from the central cloud database (https://vintage-melodies-kappa.vercel.app/api/playlists).
-     * Ensures every user on any device accesses the playlists created at the DB level.
-     */
-    fun syncWithCentralDb(onFinished: ((Boolean, Int) -> Unit)? = null) {
-        thread {
-            try {
-                val url = URL("https://vintage-melodies-kappa.vercel.app/api/playlists")
-                val conn = (url.openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 5000
-                    readTimeout = 5000
-                    setRequestProperty("User-Agent", "Mozilla/5.0")
-                }
-
-                if (conn.responseCode == 200) {
-                    val text = conn.inputStream.bufferedReader().use { it.readText() }
-                    val root = JSONObject(text)
-                    val playlistsArray = root.optJSONArray("playlists")
-
-                    var addedCount = 0
-                    if (playlistsArray != null) {
-                        val existing = getAllPlaylists().map { it.name.trim().lowercase() }.toSet()
-                        for (i in 0 until playlistsArray.length()) {
-                            val pObj = playlistsArray.getJSONObject(i)
-                            val name = pObj.optString("name", "").trim()
-                            if (name.isNotBlank() && name.lowercase() !in existing) {
-                                createPlaylist(name, "Telugu", R.drawable.vm_art_village, "")
-                                addedCount++
-                            }
-                        }
-                    }
-                    savePlaylistsBackup()
-                    onFinished?.invoke(true, addedCount)
-                } else {
-                    onFinished?.invoke(false, 0)
-                }
-            } catch (e: Exception) {
-                onFinished?.invoke(false, 0)
-            }
-        }
-    }
 }

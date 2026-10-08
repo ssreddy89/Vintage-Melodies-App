@@ -2,8 +2,11 @@ package com.vintagemelodies.app.player
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioFocusRequest
+import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PowerManager
@@ -14,6 +17,7 @@ import com.vintagemelodies.app.data.model.Song
  * Audio Player controller with progressive streaming from Cloudflare R2 CDN.
  * Fixes Error 38: Sanitizes single quotes/special characters in URLs, supplies standard
  * User-Agent headers, acquires WakeLock, and guarantees safe MediaPlayer state transitions.
+ * Integrates AudioFocus for Bluetooth & Headset priority.
  */
 class AudioPlayerManager(private val context: Context) {
 
@@ -21,6 +25,8 @@ class AudioPlayerManager(private val context: Context) {
     private var currentPlaylist: List<Song> = emptyList()
     private var currentIndex: Int = -1
     private var isPreparing: Boolean = false
+    private val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as? AudioManager
+    private var audioFocusRequest: AudioFocusRequest? = null
 
     var isShuffle: Boolean = false
     var isRepeatOne: Boolean = false
@@ -110,6 +116,7 @@ class AudioPlayerManager(private val context: Context) {
                 setDataSource(context, Uri.parse(safeUrl), headers)
                 setOnPreparedListener { mp ->
                     isPreparing = false
+                    requestAudioFocus()
                     mp.start()
                     listener?.onSongChanged(song)
                     listener?.onPlaybackStateChanged(true)
@@ -145,6 +152,31 @@ class AudioPlayerManager(private val context: Context) {
         }
     }
 
+    fun pause() {
+        mediaPlayer?.let { player ->
+            if (!isPreparing && player.isPlaying) {
+                player.pause()
+                listener?.onPlaybackStateChanged(false)
+            }
+        }
+    }
+
+    fun play() {
+        if (mediaPlayer == null) {
+            if (currentPlaylist.isNotEmpty() && currentIndex in currentPlaylist.indices) {
+                playCurrentSong()
+            }
+            return
+        }
+        mediaPlayer?.let { player ->
+            if (!isPreparing && !player.isPlaying) {
+                requestAudioFocus()
+                player.start()
+                listener?.onPlaybackStateChanged(true)
+            }
+        }
+    }
+
     fun togglePlayPause() {
         if (mediaPlayer == null) {
             if (currentPlaylist.isNotEmpty() && currentIndex in currentPlaylist.indices) {
@@ -159,6 +191,7 @@ class AudioPlayerManager(private val context: Context) {
                     player.pause()
                     listener?.onPlaybackStateChanged(false)
                 } else {
+                    requestAudioFocus()
                     player.start()
                     listener?.onPlaybackStateChanged(true)
                 }
@@ -205,6 +238,7 @@ class AudioPlayerManager(private val context: Context) {
     private fun cleanupPlayer() {
         handler.removeCallbacks(progressRunnable)
         isPreparing = false
+        abandonAudioFocus()
         try {
             mediaPlayer?.reset()
             mediaPlayer?.release()
@@ -212,6 +246,65 @@ class AudioPlayerManager(private val context: Context) {
             // Ignore reset exceptions during teardown
         }
         mediaPlayer = null
+    }
+
+    private fun requestAudioFocus(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val playbackAttributes = AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                .build()
+
+            val request = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                .setAudioAttributes(playbackAttributes)
+                .setAcceptsDelayedFocusGain(true)
+                .setOnAudioFocusChangeListener { focusChange ->
+                    when (focusChange) {
+                        AudioManager.AUDIOFOCUS_LOSS -> pause()
+                        AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> pause()
+                        AudioManager.AUDIOFOCUS_GAIN -> {
+                            if (mediaPlayer != null && !isPlaying()) {
+                                mediaPlayer?.start()
+                                listener?.onPlaybackStateChanged(true)
+                            }
+                        }
+                    }
+                }
+                .build()
+            audioFocusRequest = request
+            audioManager?.requestAudioFocus(request) == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        } else {
+            @Suppress("DEPRECATION")
+            val result = audioManager?.requestAudioFocus(
+                { focusChange ->
+                    when (focusChange) {
+                        AudioManager.AUDIOFOCUS_LOSS, AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> pause()
+                        AudioManager.AUDIOFOCUS_GAIN -> {
+                            if (mediaPlayer != null && !isPlaying()) {
+                                mediaPlayer?.start()
+                                listener?.onPlaybackStateChanged(true)
+                            }
+                        }
+                    }
+                },
+                AudioManager.STREAM_MUSIC,
+                AudioManager.AUDIOFOCUS_GAIN
+            )
+            result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED
+        }
+    }
+
+    private fun abandonAudioFocus() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
+            } else {
+                @Suppress("DEPRECATION")
+                audioManager?.abandonAudioFocus(null)
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
     }
 
     fun stop() {

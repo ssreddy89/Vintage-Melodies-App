@@ -14,11 +14,13 @@
         android:scaleType="centerCrop"
         android:src="@drawable/background" />
 
-    <!-- Dark Gradient Overlay for readability -->
+    <!-- Dynamic Overlay: 0 opacity normally, applied only while scrolling playlist -->
     <View
+        android:id="@+id/v_background_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#6E0B0703" />
+        android:background="#A60B0703"
+        android:alpha="0.0" />
 
     <!-- 2. MAIN APP CONTENT CONTAINER (with fitsSystemWindows to prevent status bar overlap) -->
     <RelativeLayout
@@ -854,7 +856,8 @@
                 android:paddingEnd="12dp"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                android:text="Admin" />
+                android:hint="Enter Username"
+                android:textColorHint="@color/input_hint" />
 
             <!-- Password Label & Input -->
             <TextView
@@ -877,17 +880,8 @@
                 android:paddingEnd="12dp"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
-                android:hint="Admin@2026 or admin"
+                android:hint="Enter Password"
                 android:textColorHint="@color/input_hint" />
-
-            <!-- Helper credentials reminder for convenience -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Tip: Use Admin / Admin@2026 or admin / admin"
-                android:textColor="@color/warm_gold"
-                android:textSize="11sp" />
 
             <!-- Action Buttons -->
             <LinearLayout

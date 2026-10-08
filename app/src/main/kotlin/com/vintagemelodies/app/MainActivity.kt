@@ -80,6 +80,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
     // App Background
     private lateinit var ivMainBackground: ImageView
+    private lateinit var vBackgroundOverlay: View
 
     // Top Bar
     private lateinit var tvTopAdminBadge: TextView
@@ -297,6 +298,8 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private fun initViews() {
         // App Background
         ivMainBackground = findViewById(R.id.iv_main_background)
+        vBackgroundOverlay = findViewById(R.id.v_background_overlay)
+        vBackgroundOverlay.alpha = 0f
 
         // Top Bar
         tvTopAdminBadge = findViewById(R.id.tv_top_admin_badge)
@@ -566,8 +569,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
             val isUserValid = user.equals("admin", ignoreCase = true)
             val isPassValid = pass == "Admin@2026" ||
                     pass.equals("admin", ignoreCase = true) ||
-                    pass == "admin123" ||
-                    pass.isNotEmpty()
+                    pass == "admin123"
 
             if (isUserValid && isPassValid) {
                 isAdmin = true
@@ -578,22 +580,42 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
                 Toast.makeText(this, "Admin mode enabled! Full access granted 🎵", Toast.LENGTH_SHORT).show()
                 showAdminMenu()
             } else {
-                Toast.makeText(this, "Please enter username: Admin, password: Admin@2026", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Invalid credentials. Please enter valid password.", Toast.LENGTH_SHORT).show()
             }
         }
+
+        // Background Opacity on Scroll (Item 3)
+        setupScrollBackgroundOverlay(rvMoodPlaylists)
+        setupScrollBackgroundOverlay(rvPlaylistSongs)
+        setupScrollBackgroundOverlay(rvDrawerPlaylists)
+    }
+
+    private fun setupScrollBackgroundOverlay(recyclerView: RecyclerView) {
+        recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            private var totalDy = 0
+
+            override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(rv, dx, dy)
+                totalDy = (totalDy + dy).coerceAtLeast(0)
+                // Opacity is 0 normally; smoothly darkens up to 0.75 only when scrolling playlists
+                val targetAlpha = (totalDy.toFloat() / 250f).coerceIn(0f, 0.75f)
+                vBackgroundOverlay.alpha = targetAlpha
+            }
+
+            override fun onScrollStateChanged(rv: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(rv, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE && !rv.canScrollVertically(-1)) {
+                    totalDy = 0
+                    vBackgroundOverlay.animate().alpha(0f).setDuration(200).start()
+                }
+            }
+        })
     }
 
     private fun loadInitialData() {
-        // Restore from backup file if needed, then sync from cloud DB
+        // Restore from persistent backup file if needed (Separate from Web playlists)
         repository.restoreFromBackupIfEmpty()
         refreshPlaylists()
-
-        // Sync with central database in background
-        repository.syncWithCentralDb { success, count ->
-            if (success && count > 0) {
-                runOnUiThread { refreshPlaylists() }
-            }
-        }
     }
 
     // ── Session Persistence: Restore Last Played Session (Item 2) ────────────
@@ -1040,7 +1062,6 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         val options = arrayOf(
             "➕ Create New Playlist",
             "🌐 Configure Languages",
-            "☁️ Sync with Central DB",
             "🔄 Check for App Updates",
             "🔓 Log Out Admin"
         )
@@ -1050,21 +1071,8 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
                 when (which) {
                     0 -> showCreateOrEditPlaylistDialog(existingPlaylist = null)
                     1 -> showLanguageSelectionDialog(isFirstTime = false)
-                    2 -> {
-                        Toast.makeText(this, "Syncing playlists with central cloud DB...", Toast.LENGTH_SHORT).show()
-                        repository.syncWithCentralDb { success, count ->
-                            runOnUiThread {
-                                if (success) {
-                                    refreshPlaylists()
-                                    Toast.makeText(this, "Sync complete! Playlists updated from DB ($count new).", Toast.LENGTH_LONG).show()
-                                } else {
-                                    Toast.makeText(this, "Central DB sync finished. Local playlists up to date.", Toast.LENGTH_SHORT).show()
-                                }
-                            }
-                        }
-                    }
-                    3 -> AppUpdateManager.checkForUpdate(this, isManual = true)
-                    4 -> {
+                    2 -> AppUpdateManager.checkForUpdate(this, isManual = true)
+                    3 -> {
                         isAdmin = false
                         getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().putBoolean(KEY_IS_ADMIN, false).apply()
                         updateAdminUi()
