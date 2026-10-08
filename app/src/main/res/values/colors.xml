@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Vintage Melodies Brand Colors (Extracted from 1.jfif & 4.jfif) -->
+    <color name="dark_espresso">#FF15200E</color>
+    <color name="dark_background">#FF141D0D</color>
+    <color name="card_background">#991C2B14</color>
+    <color name="card_border">#FF4F752C</color>
+    <color name="amber_accent">#FFA4CD5C</color>
+    <color name="warm_gold">#FFC6EA7C</color>
+    <color name="amber_light">#FFE4F5BF</color>
+    <color name="theme_teal">#FF8FCBDE</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#D9C6EA7C</color>
+    <color name="text_muted">#B3FFFFFF</color>
+    <color name="splash_background">#FF121A0C</color>
+    <color name="error_red">#FFFF6B6B</color>
+    <color name="loading_overlay">#CC121A0C</color>
+
+    <!-- Additional UI Colors matching theme -->
+    <color name="player_bar_bg">#8014200E</color>
+    <color name="input_bg">#40000000</color>
+    <color name="input_border">#804F752C</color>
+    <color name="input_text">#FFFFFFFF</color>
+    <color name="input_hint">#80FFFFFF</color>
+    <color name="divider_color">#33A4CD5C</color>
+    <color name="item_hover">#33A4CD5C</color>
+    <color name="action_btn_bg">#402D4219</color>
+    <color name="badge_bg">#33A4CD5C</color>
+
+    <!-- Glowing Semi-Transparent Neon Player (Themed from 1.jfif & 4.jfif) -->
+    <color name="neon_amber_glow">#FFC6EA7C</color>
+    <color name="neon_amber_outer_shadow">#50A4CD5C</color>
+    <color name="neon_amber_deep_shadow">#253C6120</color>
+    <color name="neon_border">#FFC6EA7C</color>
+    <color name="neon_player_card_bg">#8014200E</color>
+    <color name="admin_badge_green">#00E676</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

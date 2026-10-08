@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Vintage Melodies</string>
+    <string name="splash_brand">Vintage Melodies</string>
+    <string name="splash_tagline">Warm Music, Timeless Vibes</string>
+    <string name="loading_message">Loading Vintage Melodies\u2026</string>
+    <string name="error_no_internet_title">Internet connection is unavailable</string>
+    <string name="error_no_internet_message">Please check your Internet connection and try again.</string>
+    <string name="error_page_load_title">Unable to load the page</string>
+    <string name="error_page_load_message">Something went wrong. Please try again.</string>
+    <string name="btn_retry">Retry</string>
+    <string name="content_description_brand_icon">Vintage Melodies music note</string>
+</resources>

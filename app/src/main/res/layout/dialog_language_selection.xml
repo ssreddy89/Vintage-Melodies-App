@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_card"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🌐 Select Languages"
+            android:textColor="@color/amber_light"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="16dp"
+            android:text="Choose one or more languages to personalize your playlists:"
+            android:textColor="@color/text_muted"
+            android:textSize="13sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_input_field"
+            android:padding="8dp"
+            android:orientation="vertical">
+
+            <CheckBox
+                android:id="@+id/cb_lang_telugu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:text="Telugu (తెలుగు)"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/warm_gold"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider_color" />
+
+            <CheckBox
+                android:id="@+id/cb_lang_english"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:text="English"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/warm_gold"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider_color" />
+
+            <CheckBox
+                android:id="@+id/cb_lang_hindi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:text="Hindi (हिन्दी)"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/warm_gold"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider_color" />
+
+            <CheckBox
+                android:id="@+id/cb_lang_tamil"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:text="Tamil (தமிழ்)"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/warm_gold"
+                android:textSize="15sp" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/divider_color" />
+
+            <CheckBox
+                android:id="@+id/cb_lang_kannada"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:text="Kannada (ಕನ್ನಡ)"
+                android:textColor="@color/text_primary"
+                android:buttonTint="@color/warm_gold"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_select_all_langs"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="44dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_pill_button"
+                android:text="Select All"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:includeFontPadding="false"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/btn_save_languages"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:minHeight="44dp"
+                android:background="@drawable/bg_retry_button"
+                android:text="Save &amp; Continue"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:includeFontPadding="false"
+                android:textAllCaps="false" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

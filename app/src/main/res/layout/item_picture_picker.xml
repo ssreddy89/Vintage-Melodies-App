@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="72dp"
+    android:layout_height="72dp"
+    android:layout_marginEnd="8dp">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/iv_picture_thumb"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/vm_art_village"
+        app:shapeAppearanceOverlay="@style/RoundedImageCorner12" />
+
+    <View
+        android:id="@+id/view_picture_selected_border"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bg_picture_selected"
+        android:visibility="gone" />
+</FrameLayout>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme matching website dark vintage aesthetic -->
+    <style name="Theme.VintageMelodies" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/amber_accent</item>
+        <item name="colorPrimaryContainer">@color/card_background</item>
+        <item name="colorOnPrimary">@color/text_primary</item>
+        <item name="colorSecondary">@color/warm_gold</item>
+        <item name="android:statusBarColor">@color/dark_espresso</item>
+        <item name="android:navigationBarColor">@color/dark_espresso</item>
+        <item name="android:windowBackground">@color/dark_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <!-- Splash screen theme -->
+    <style name="Theme.VintageMelodies.Splash">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+        <item name="android:statusBarColor">@color/splash_background</item>
+        <item name="android:navigationBarColor">@color/splash_background</item>
+    </style>
+
+    <style name="RoundedImageCorner12" parent="">
+        <item name="cornerSize">12dp</item>
+        <item name="cornerFamily">rounded</item>
+    </style>
+</resources>

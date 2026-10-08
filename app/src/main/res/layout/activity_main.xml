@@ -1,0 +1,935 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_background">
+
+    <!-- 1. FULLSCREEN VINTAGE BACKGROUND -->
+    <ImageView
+        android:id="@+id/iv_main_background"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/background" />
+
+    <!-- Dark Gradient Overlay for readability -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#6E0B0703" />
+
+    <!-- 2. MAIN APP CONTENT CONTAINER (with fitsSystemWindows to prevent status bar overlap) -->
+    <RelativeLayout
+        android:id="@+id/layout_main_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <!-- TOP BAR: Brand & Actions -->
+        <LinearLayout
+            android:id="@+id/top_bar"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_alignParentTop="true"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tv_app_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="♬ Vintage Melodies"
+                android:textColor="@color/amber_light"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <!-- Admin Status Indicator Badge -->
+            <TextView
+                android:id="@+id/tv_top_admin_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="24dp"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_pill_button"
+                android:gravity="center"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:text="★ ADMIN"
+                android:textColor="@color/amber_light"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <!-- Language Selection Button -->
+            <ImageButton
+                android:id="@+id/btn_top_language"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:background="@drawable/bg_circle_button"
+                android:src="@drawable/ic_language"
+                android:tint="@color/text_primary"
+                android:contentDescription="Select Languages"
+                android:padding="8dp" />
+
+            <!-- Sleep Timer / Clock Button -->
+            <ImageButton
+                android:id="@+id/btn_top_timer"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_circle_button"
+                android:src="@drawable/ic_timer"
+                android:tint="@color/text_primary"
+                android:contentDescription="Sleep Timer"
+                android:padding="8dp" />
+
+            <!-- Playlists Drawer Toggle -->
+            <ImageButton
+                android:id="@+id/btn_top_playlists"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_circle_button"
+                android:src="@drawable/ic_playlist"
+                android:tint="@color/text_primary"
+                android:contentDescription="Playlists"
+                android:padding="8dp" />
+
+            <!-- Admin Profile / Login Button -->
+            <ImageButton
+                android:id="@+id/btn_top_admin"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_circle_button"
+                android:src="@drawable/ic_admin"
+                android:tint="@color/text_primary"
+                android:contentDescription="Admin Mode"
+                android:padding="8dp" />
+        </LinearLayout>
+
+        <!-- Telugu Title Art in Center-Top -->
+        <TextView
+            android:id="@+id/tv_telugu_hero_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/top_bar"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="12dp"
+            android:text="మధుర గీతాలు"
+            android:textColor="#E6E09E"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:shadowColor="#CC000000"
+            android:shadowDx="2"
+            android:shadowDy="4"
+            android:shadowRadius="6" />
+
+        <!-- MOOD PLAYLISTS SECTION -->
+        <LinearLayout
+            android:id="@+id/layout_mood_section"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/bottom_player_container"
+            android:layout_marginBottom="12dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginEnd="12dp"
+            android:background="@drawable/bg_dialog_card"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tv_mood_header"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_centerVertical="true"
+                    android:text="Playlists for Every Mood"
+                    android:textColor="@color/text_primary"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_centerVertical="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_see_all"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="36dp"
+                        android:background="@drawable/bg_pill_button"
+                        android:text="See All →"
+                        android:textColor="@color/text_primary"
+                        android:textSize="12sp"
+                        android:textAllCaps="false"
+                        android:paddingStart="14dp"
+                        android:paddingEnd="14dp"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:includeFontPadding="false" />
+
+                    <ImageButton
+                        android:id="@+id/btn_close_mood_section"
+                        android:layout_width="32dp"
+                        android:layout_height="32dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_circle_button"
+                        android:src="@drawable/ic_close"
+                        android:tint="@color/text_primary"
+                        android:contentDescription="Close Playlists"
+                        android:padding="7dp" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <!-- Horizontal Carousel of Mood Cards -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_mood_playlists"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:orientation="horizontal"
+                android:nestedScrollingEnabled="false"
+                android:overScrollMode="always" />
+        </LinearLayout>
+
+        <!-- 3. GORGEOUS GLOWING NEON PLAYER (Exact match to Reference Image 4) -->
+        <FrameLayout
+            android:id="@+id/bottom_player_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="10dp"
+            android:clipToPadding="false"
+            android:padding="4dp">
+
+            <!-- Glowing Card Surface (with ambient amber backlight glow and neon border) -->
+            <LinearLayout
+                android:id="@+id/bottom_player_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_neon_ambient_glow"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingTop="14dp"
+                android:paddingEnd="14dp"
+                android:paddingBottom="14dp"
+                android:gravity="center_vertical"
+                android:elevation="12dp"
+                android:outlineAmbientShadowColor="@color/neon_amber_glow"
+                android:outlineSpotShadowColor="@color/neon_amber_glow">
+
+                <!-- Left: Square Album Artwork with rounded corners (Matching Image 4) -->
+                <com.google.android.material.imageview.ShapeableImageView
+                    android:id="@+id/iv_player_art"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:scaleType="centerCrop"
+                    android:src="@drawable/ic_vintage_player_art_2"
+                    app:shapeAppearanceOverlay="@style/RoundedImageCorner12" />
+
+                <!-- Right: Content & Controls Column (Matching Image 4) -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="12dp"
+                    android:orientation="vertical">
+
+                    <!-- Row 1: Title, Artist, Heart, Equalizer (Matching Image 4 & user request) -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_toStartOf="@id/layout_player_actions"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/tv_player_title"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Select a song to play"
+                                android:textColor="@color/text_primary"
+                                android:textSize="14sp"
+                                android:textStyle="bold"
+                                android:singleLine="true"
+                                android:ellipsize="end" />
+
+                            <TextView
+                                android:id="@+id/tv_player_artist"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="1dp"
+                                android:text="Vintage Melodies • Cloudflare R2"
+                                android:textColor="@color/amber_light"
+                                android:textSize="11sp"
+                                android:singleLine="true"
+                                android:ellipsize="end" />
+                        </LinearLayout>
+
+                        <!-- Heart & Equalizer Buttons (Matching user request) -->
+                        <LinearLayout
+                            android:id="@+id/layout_player_actions"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:layout_centerVertical="true"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <ImageButton
+                                android:id="@+id/btn_player_heart"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:src="@drawable/ic_favorite_border"
+                                android:tint="@color/text_primary"
+                                android:contentDescription="Favorite"
+                                android:padding="4dp" />
+
+                            <ImageButton
+                                android:id="@+id/btn_player_equalizer"
+                                android:layout_width="28dp"
+                                android:layout_height="28dp"
+                                android:layout_marginStart="6dp"
+                                android:background="?attr/selectableItemBackgroundBorderless"
+                                android:src="@drawable/ic_equalizer"
+                                android:tint="@color/text_primary"
+                                android:contentDescription="Equalizer"
+                                android:padding="4dp" />
+                        </LinearLayout>
+                    </RelativeLayout>
+
+                    <!-- Row 2: Seekbar / Progress Bar (Matching Image 4) -->
+                    <SeekBar
+                        android:id="@+id/player_seek_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:paddingStart="0dp"
+                        android:paddingEnd="0dp"
+                        android:maxHeight="3dp"
+                        android:minHeight="3dp"
+                        android:progressDrawable="@drawable/bg_seekbar_progress"
+                        android:thumb="@drawable/bg_seekbar_thumb"
+                        android:splitTrack="false" />
+
+                    <!-- Row 3: Timestamps (Matching Image 4) -->
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp">
+
+                        <TextView
+                            android:id="@+id/tv_player_current_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentStart="true"
+                            android:text="0:00"
+                            android:textColor="@color/text_muted"
+                            android:textSize="10sp" />
+
+                        <TextView
+                            android:id="@+id/tv_player_total_time"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentEnd="true"
+                            android:text="0:00"
+                            android:textColor="@color/text_muted"
+                            android:textSize="10sp" />
+                    </RelativeLayout>
+
+                    <!-- Row 4: Controls Row (Shuffle, Prev, Play/Pause Circle, Next, Repeat) (Matching Image 4) -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <!-- Shuffle -->
+                        <ImageButton
+                            android:id="@+id/btn_shuffle"
+                            android:layout_width="0dp"
+                            android:layout_height="32dp"
+                            android:layout_weight="1"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_shuffle"
+                            android:tint="@color/text_muted"
+                            android:contentDescription="Shuffle"
+                            android:padding="6dp" />
+
+                        <!-- Previous -->
+                        <ImageButton
+                            android:id="@+id/btn_prev"
+                            android:layout_width="0dp"
+                            android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_skip_previous"
+                            android:tint="@color/text_primary"
+                            android:contentDescription="Previous"
+                            android:padding="6dp" />
+
+                        <!-- Circular Outlined Play/Pause Button (Matching Image 4) -->
+                        <ImageButton
+                            android:id="@+id/btn_play_pause"
+                            android:layout_width="44dp"
+                            android:layout_height="44dp"
+                            android:layout_marginStart="4dp"
+                            android:layout_marginEnd="4dp"
+                            android:background="@drawable/bg_play_circle_outlined"
+                            android:src="@drawable/ic_play_arrow"
+                            android:tint="@color/text_primary"
+                            android:contentDescription="Play or Pause"
+                            android:padding="8dp" />
+
+                        <!-- Next -->
+                        <ImageButton
+                            android:id="@+id/btn_next"
+                            android:layout_width="0dp"
+                            android:layout_height="34dp"
+                            android:layout_weight="1"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_skip_next"
+                            android:tint="@color/text_primary"
+                            android:contentDescription="Next"
+                            android:padding="6dp" />
+
+                        <!-- Repeat -->
+                        <ImageButton
+                            android:id="@+id/btn_repeat"
+                            android:layout_width="0dp"
+                            android:layout_height="32dp"
+                            android:layout_weight="1"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:src="@drawable/ic_repeat"
+                            android:tint="@color/text_muted"
+                            android:contentDescription="Repeat"
+                            android:padding="6dp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+        </FrameLayout>
+    </RelativeLayout>
+
+    <!-- 4. SLIDE-OUT PLAYLISTS DRAWER -->
+    <LinearLayout
+        android:id="@+id/layout_drawer_playlists"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F2150D06"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:fitsSystemWindows="true"
+        android:visibility="gone">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <TextView
+                android:id="@+id/tv_drawer_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="🎼 Playlists"
+                android:textColor="@color/amber_light"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- Admin New Playlist Button -->
+            <Button
+                android:id="@+id/btn_admin_create_playlist"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="36dp"
+                android:layout_toStartOf="@id/btn_close_drawer"
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="12dp"
+                android:background="@drawable/bg_retry_button"
+                android:text="+ New"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:includeFontPadding="false"
+                android:textAllCaps="false"
+                android:visibility="gone" />
+
+            <ImageButton
+                android:id="@+id/btn_close_drawer"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_close"
+                android:tint="@color/text_primary"
+                android:contentDescription="Close"
+                android:padding="8dp" />
+        </RelativeLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/divider_color" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_drawer_playlists"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <!-- 5. PLAYLIST SONGS VIEW (When a playlist is opened) -->
+    <LinearLayout
+        android:id="@+id/layout_playlist_songs_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#F7150D06"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:fitsSystemWindows="true"
+        android:visibility="gone">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <Button
+                android:id="@+id/btn_back_to_playlists"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="38dp"
+                android:layout_centerVertical="true"
+                android:background="@drawable/bg_pill_button"
+                android:text="← Back"
+                android:textColor="@color/text_primary"
+                android:textSize="12sp"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:includeFontPadding="false"
+                android:textAllCaps="false" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tv_active_playlist_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Songs"
+                    android:textColor="@color/amber_light"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:maxLines="1"
+                    android:ellipsize="end" />
+
+                <!-- Prominent Language Chip (Item 6) -->
+                <TextView
+                    android:id="@+id/tv_active_playlist_lang_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:background="@drawable/bg_pill_button"
+                    android:paddingStart="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="3dp"
+                    android:text="TELUGU"
+                    android:textColor="@color/warm_gold"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <!-- Admin Options Button for playlist -->
+            <ImageButton
+                android:id="@+id/btn_playlist_options"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_more_horiz"
+                android:tint="@color/text_primary"
+                android:contentDescription="Playlist Options"
+                android:padding="8dp" />
+        </RelativeLayout>
+
+        <!-- Admin Bulk Add Songs to Playlist Bar -->
+        <LinearLayout
+            android:id="@+id/layout_admin_playlist_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="8dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btn_admin_add_r2_songs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="42dp"
+                android:background="@drawable/bg_retry_button"
+                android:text="☁️ Add Songs from Cloud R2"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="8dp"
+                android:paddingBottom="8dp"
+                android:includeFontPadding="false"
+                android:textAllCaps="false" />
+        </LinearLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_playlist_songs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </LinearLayout>
+
+    <!-- 6. CLOUDFLARE R2 SONG PICKER DIALOG / PANEL (Admin Bulk Add) -->
+    <LinearLayout
+        android:id="@+id/layout_r2_picker"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#FA150D06"
+        android:orientation="vertical"
+        android:clickable="true"
+        android:focusable="true"
+        android:fitsSystemWindows="true"
+        android:visibility="gone">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <TextView
+                android:id="@+id/tv_r2_picker_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
+                android:text="☁️ Cloudflare R2 Catalog"
+                android:textColor="@color/amber_light"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <ImageButton
+                android:id="@+id/btn_close_r2_picker"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:src="@drawable/ic_close"
+                android:tint="@color/text_primary"
+                android:contentDescription="Close"
+                android:padding="8dp" />
+        </RelativeLayout>
+
+        <!-- Subheader text -->
+        <TextView
+            android:id="@+id/tv_r2_picker_subtitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:layout_marginBottom="8dp"
+            android:text="Select a folder to browse unadded cloud songs:"
+            android:textColor="@color/text_muted"
+            android:textSize="12sp" />
+
+        <!-- 1. FOLDERS VIEW (First level) -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_r2_picker_folders"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible" />
+
+        <!-- 2. SONGS IN FOLDER VIEW (Second level) -->
+        <LinearLayout
+            android:id="@+id/layout_r2_folder_songs"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- Breadcrumb Navigation Bar -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                android:paddingBottom="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_back_to_folders"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="38dp"
+                    android:background="@drawable/bg_pill_button"
+                    android:text="← Folders"
+                    android:textColor="@color/text_primary"
+                    android:textSize="12sp"
+                    android:paddingStart="12dp"
+                    android:paddingEnd="12dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:includeFontPadding="false"
+                    android:textAllCaps="false" />
+
+                <TextView
+                    android:id="@+id/tv_current_folder_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:text="Songs/90's"
+                    android:textColor="@color/amber_light"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btn_select_all_folder_songs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="38dp"
+                    android:background="@drawable/bg_pill_button"
+                    android:text="Select All"
+                    android:textColor="@color/warm_gold"
+                    android:textSize="11sp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:paddingTop="6dp"
+                    android:paddingBottom="6dp"
+                    android:includeFontPadding="false"
+                    android:textAllCaps="false" />
+            </LinearLayout>
+
+            <!-- Live Search Input within folder -->
+            <EditText
+                android:id="@+id/et_search_r2_songs"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/bg_input_field"
+                android:hint="Search unadded songs in this folder..."
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/input_hint"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btn_confirm_add_selected"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="44dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginBottom="8dp"
+                android:background="@drawable/bg_retry_button"
+                android:text="Add Selected to Playlist (0)"
+                android:textColor="@color/text_primary"
+                android:textSize="13sp"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:includeFontPadding="false"
+                android:textAllCaps="false" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_r2_picker_songs"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 7. ADMIN LOGIN MODAL OVERLAY (Reference Screenshot 2) -->
+    <FrameLayout
+        android:id="@+id/layout_admin_login_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#CC000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="24dp"
+            android:layout_marginEnd="24dp"
+            android:background="@drawable/bg_dialog_card"
+            android:orientation="vertical"
+            android:padding="24dp">
+
+            <ImageView
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center_horizontal"
+                android:src="@drawable/ic_admin"
+                android:tint="@color/amber_accent" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="12dp"
+                android:text="Admin Login"
+                android:textColor="@color/amber_light"
+                android:textSize="22sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="4dp"
+                android:text="Enter credentials to manage playlists"
+                android:textColor="@color/text_muted"
+                android:textSize="13sp" />
+
+            <!-- Username Label & Input -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
+                android:text="USERNAME"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_admin_username"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:text="Admin" />
+
+            <!-- Password Label & Input -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="14dp"
+                android:text="PASSWORD"
+                android:textColor="@color/text_muted"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/et_admin_password"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:inputType="textPassword"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:hint="Admin@2026 or admin"
+                android:textColorHint="@color/input_hint" />
+
+            <!-- Helper credentials reminder for convenience -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Tip: Use Admin / Admin@2026 or admin / admin"
+                android:textColor="@color/warm_gold"
+                android:textSize="11sp" />
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:gravity="end"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_cancel_login"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="42dp"
+                    android:background="@drawable/bg_pill_button"
+                    android:text="Cancel"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:paddingStart="18dp"
+                    android:paddingEnd="18dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:includeFontPadding="false"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btn_submit_login"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="42dp"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_retry_button"
+                    android:text="Sign In"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:paddingStart="22dp"
+                    android:paddingEnd="22dp"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"
+                    android:includeFontPadding="false"
+                    android:textAllCaps="false" />
+            </LinearLayout>
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>

@@ -1,0 +1,8 @@
+{
+  "versionCode": 1,
+  "versionName": "1.0.0",
+  "apkUrl": "https://github.com/ssreddy89/Vintage-Melodies-App/releases/latest/download/app-debug.apk",
+  "changelog": "Initial stable release with persistent playlists, central DB sync, notification player, and smooth audio streaming.",
+  "forceUpdate": false,
+  "minVersionCode": 1
+}
