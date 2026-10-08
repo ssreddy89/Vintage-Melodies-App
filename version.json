@@ -1,8 +1,8 @@
 {
-  "versionCode": 6,
-  "versionName": "1.0.5",
+  "versionCode": 7,
+  "versionName": "1.0.6",
   "apkUrl": "https://pub-e7f4f743d98b43b89671fe068ee1ee05.r2.dev/apk/Vintage-Melodies-v1.apk",
-  "changelog": "Mandatory Update v1.0.5: Dynamic Cloudflare R2 folder support (80's, 90's, Latest, and all future subfolders), live cloud catalog sync for newly uploaded songs, alphabetical folder sorting, and in-folder song sorting by Album and Year.",
+  "changelog": "Mandatory Update v1.0.6: Fixed cloud folder remaining count and song visibility when adding to playlists, eliminated SQLite cascade delete bug on cloud sync, and restored automatic folder refresh.",
   "forceUpdate": true,
-  "minVersionCode": 6
+  "minVersionCode": 7
 }

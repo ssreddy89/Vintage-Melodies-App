@@ -89,7 +89,10 @@ object CloudCatalogSyncManager {
                                 put("media_url", mediaUrl)
                                 put("artwork_url", finalArtwork)
                             }
-                            db.insertWithOnConflict(VintageDatabaseHelper.TABLE_SONGS, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+                            val updatedRows = db.update(VintageDatabaseHelper.TABLE_SONGS, cv, "id = ?", arrayOf(id))
+                            if (updatedRows == 0) {
+                                db.insert(VintageDatabaseHelper.TABLE_SONGS, null, cv)
+                            }
                             count++
                         }
                         success = true

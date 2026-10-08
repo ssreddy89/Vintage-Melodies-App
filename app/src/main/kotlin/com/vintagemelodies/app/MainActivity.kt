@@ -553,8 +553,13 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         btnConfirmAddSelected.setOnClickListener {
             activePlaylist?.let { pl ->
                 if (selectedSongIds.isNotEmpty()) {
+                    val count = selectedSongIds.size
                     repository.addSongsToPlaylist(pl.id, selectedSongIds.toList())
-                    Toast.makeText(this, "Added ${selectedSongIds.size} songs to ${pl.name}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Added $count songs to ${pl.name}", Toast.LENGTH_SHORT).show()
+                    selectedSongIds.clear()
+                    isAllFolderSongsSelected = false
+                    btnSelectAllFolderSongs.text = "Select All"
+                    returnToFolderList()
                     layoutR2Picker.visibility = View.GONE
                     openPlaylist(pl)
                 } else {
@@ -568,8 +573,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
                 val query = s?.toString()?.trim() ?: ""
                 val filtered = repository.getUnassignedSongs(
                     folderFilter = activeCloudFolder,
-                    query = query,
-                    targetPlaylistId = activePlaylist?.id
+                    query = query
                 )
                 r2PickerAdapter.updateData(filtered)
             }
@@ -1011,10 +1015,10 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         tvR2PickerSubtitle.text = "Syncing latest cloud folders & songs..."
         CloudCatalogSyncManager.syncFromCloud(this) { success, _ ->
             if (layoutR2Picker.visibility == View.VISIBLE && rvR2PickerFolders.visibility == View.VISIBLE) {
-                val updatedFolders = repository.getAvailableCloudFolders(activePlaylist?.id)
+                val updatedFolders = repository.getAvailableCloudFolders()
                 folderAdapter.updateData(updatedFolders)
-                tvR2PickerSubtitle.text = if (updatedFolders.isEmpty()) {
-                    "All cloud songs have already been added to this playlist!"
+                tvR2PickerSubtitle.text = if (updatedFolders.isEmpty() || updatedFolders.all { it.songCount == 0 }) {
+                    "All cloud songs have already been added to playlists!"
                 } else {
                     "Select a folder to browse unadded cloud songs:"
                 }
@@ -1028,11 +1032,11 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         tvR2PickerTitle.text = "☁️ Cloudflare R2 Folders"
         tvR2PickerSubtitle.text = "Select a folder to browse unadded cloud songs:"
 
-        val folders = repository.getAvailableCloudFolders(activePlaylist?.id)
+        val folders = repository.getAvailableCloudFolders()
         folderAdapter.updateData(folders)
 
-        if (folders.isEmpty()) {
-            tvR2PickerSubtitle.text = "All cloud songs have already been added to this playlist!"
+        if (folders.isEmpty() || folders.all { it.songCount == 0 }) {
+            tvR2PickerSubtitle.text = "All cloud songs have already been added to playlists!"
         }
     }
 
@@ -1043,10 +1047,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         btnSelectAllFolderSongs.text = "Select All"
         etSearchR2Songs.setText("")
 
-        val songs = repository.getUnassignedSongs(
-            folderFilter = folderName,
-            targetPlaylistId = activePlaylist?.id
-        )
+        val songs = repository.getUnassignedSongs(folderFilter = folderName)
         r2PickerAdapter.updateData(songs)
 
         val cleanName = CloudFolder(folderName).displayName

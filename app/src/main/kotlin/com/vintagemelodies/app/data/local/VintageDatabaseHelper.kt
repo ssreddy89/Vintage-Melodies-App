@@ -16,7 +16,7 @@ class VintageDatabaseHelper(private val context: Context) :
 
     companion object {
         const val DATABASE_NAME = "vintage_melodies_standalone.db"
-        const val DATABASE_VERSION = 7
+        const val DATABASE_VERSION = 8
 
         const val TABLE_SONGS = "songs"
         const val TABLE_PLAYLISTS = "playlists"
@@ -71,7 +71,7 @@ class VintageDatabaseHelper(private val context: Context) :
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        if (oldVersion < 7) {
+        if (oldVersion < 8) {
             try {
                 db.execSQL("ALTER TABLE $TABLE_SONGS ADD COLUMN year TEXT DEFAULT ''")
             } catch (_: Exception) {}
@@ -79,11 +79,6 @@ class VintageDatabaseHelper(private val context: Context) :
                 db.execSQL("ALTER TABLE $TABLE_SONGS ADD COLUMN artwork_url TEXT DEFAULT ''")
             } catch (_: Exception) {}
             preSeedSongsOnly(db)
-        } else {
-            db.execSQL("DROP TABLE IF EXISTS $TABLE_PLAYLIST_SONGS")
-            db.execSQL("DROP TABLE IF EXISTS $TABLE_PLAYLISTS")
-            db.execSQL("DROP TABLE IF EXISTS $TABLE_SONGS")
-            onCreate(db)
         }
     }
 
@@ -128,7 +123,10 @@ class VintageDatabaseHelper(private val context: Context) :
                     put("artwork_res_id", artResId)
                     put("artwork_url", artworkUrl)
                 }
-                db.insertWithOnConflict(TABLE_SONGS, null, cv, SQLiteDatabase.CONFLICT_REPLACE)
+                val updatedRows = db.update(TABLE_SONGS, cv, "id = ?", arrayOf(id))
+                if (updatedRows == 0) {
+                    db.insert(TABLE_SONGS, null, cv)
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()

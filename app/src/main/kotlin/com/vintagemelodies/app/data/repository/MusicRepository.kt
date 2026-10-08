@@ -154,24 +154,19 @@ class MusicRepository(private val context: Context) {
         return list
     }
 
-    fun getAvailableCloudFolders(targetPlaylistId: Long? = null): List<CloudFolder> {
+    fun getAvailableCloudFolders(): List<CloudFolder> {
         val db = dbHelper.readableDatabase
         val list = mutableListOf<CloudFolder>()
-
-        val whereClause = if (targetPlaylistId != null) {
-            "WHERE id NOT IN (SELECT song_id FROM ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS} WHERE playlist_id = ?)"
-        } else ""
-        val args = if (targetPlaylistId != null) arrayOf(targetPlaylistId.toString()) else null
 
         val cursor = db.rawQuery(
             """
             SELECT folder, COUNT(*) as song_count
             FROM ${VintageDatabaseHelper.TABLE_SONGS}
-            $whereClause
+            WHERE id NOT IN (SELECT DISTINCT song_id FROM ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS})
             GROUP BY folder
             ORDER BY folder COLLATE NOCASE ASC
             """.trimIndent(),
-            args
+            null
         )
 
         cursor.use {
@@ -186,19 +181,13 @@ class MusicRepository(private val context: Context) {
 
     fun getUnassignedSongs(
         folderFilter: String = "",
-        query: String = "",
-        targetPlaylistId: Long? = null
+        query: String = ""
     ): List<Song> {
         val db = dbHelper.readableDatabase
         val list = mutableListOf<Song>()
 
-        val whereClauses = mutableListOf<String>()
+        val whereClauses = mutableListOf("id NOT IN (SELECT DISTINCT song_id FROM ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS})")
         val args = mutableListOf<String>()
-
-        if (targetPlaylistId != null) {
-            whereClauses.add("id NOT IN (SELECT song_id FROM ${VintageDatabaseHelper.TABLE_PLAYLIST_SONGS} WHERE playlist_id = ?)")
-            args.add(targetPlaylistId.toString())
-        }
 
         if (folderFilter.isNotBlank()) {
             whereClauses.add("folder = ?")
@@ -212,7 +201,7 @@ class MusicRepository(private val context: Context) {
             args.add("%$query%")
         }
 
-        val whereSql = if (whereClauses.isNotEmpty()) "WHERE ${whereClauses.joinToString(" AND ")}" else ""
+        val whereSql = "WHERE ${whereClauses.joinToString(" AND ")}"
         val sql = "SELECT id, title, artist, folder, album, duration, media_url, artwork_res_id, year, artwork_url FROM ${VintageDatabaseHelper.TABLE_SONGS} $whereSql ORDER BY album COLLATE NOCASE ASC, year ASC, title COLLATE NOCASE ASC"
         val cursor = db.rawQuery(sql, if (args.isEmpty()) null else args.toTypedArray())
 
@@ -413,23 +402,31 @@ class MusicRepository(private val context: Context) {
             val array = JSONArray(jsonStr)
 
             val existingPlaylists = getAllPlaylists()
-            val existingNames = existingPlaylists.map { it.name }.toSet()
+            val existingMap = existingPlaylists.associateBy { it.name }
 
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
                 val name = obj.optString("name")
-                if (name !in existingNames) {
+                val songsArray = obj.optJSONArray("song_ids")
+                val ids = mutableListOf<String>()
+                if (songsArray != null && songsArray.length() > 0) {
+                    for (s in 0 until songsArray.length()) {
+                        ids.add(songsArray.getString(s))
+                    }
+                }
+
+                val existing = existingMap[name]
+                if (existing != null) {
+                    val currentSongs = getSongsForPlaylist(existing.id)
+                    if (currentSongs.isEmpty() && ids.isNotEmpty()) {
+                        addSongsToPlaylist(existing.id, ids)
+                    }
+                } else {
                     val lang = obj.optString("language", "Telugu")
                     val coverRes = obj.optInt("cover_res_id", R.drawable.vm_art_village)
                     val coverUrl = obj.optString("cover_url", "")
                     val newId = createPlaylist(name, lang, coverRes, coverUrl)
-
-                    val songsArray = obj.optJSONArray("song_ids")
-                    if (songsArray != null && songsArray.length() > 0) {
-                        val ids = mutableListOf<String>()
-                        for (s in 0 until songsArray.length()) {
-                            ids.add(songsArray.getString(s))
-                        }
+                    if (ids.isNotEmpty()) {
                         addSongsToPlaylist(newId, ids)
                     }
                 }
