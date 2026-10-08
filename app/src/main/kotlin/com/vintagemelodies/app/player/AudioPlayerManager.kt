@@ -95,6 +95,10 @@ class AudioPlayerManager(private val context: Context) {
             return
         }
 
+        // 1. Instant UI update - zero delay visual response!
+        listener?.onSongChanged(song)
+        listener?.onPlaybackStateChanged(true)
+
         cleanupPlayer()
         isPreparing = true
 
@@ -118,7 +122,6 @@ class AudioPlayerManager(private val context: Context) {
                     isPreparing = false
                     requestAudioFocus()
                     mp.start()
-                    listener?.onSongChanged(song)
                     listener?.onPlaybackStateChanged(true)
                     handler.post(progressRunnable)
                 }
@@ -239,13 +242,18 @@ class AudioPlayerManager(private val context: Context) {
         handler.removeCallbacks(progressRunnable)
         isPreparing = false
         abandonAudioFocus()
-        try {
-            mediaPlayer?.reset()
-            mediaPlayer?.release()
-        } catch (e: Exception) {
-            // Ignore reset exceptions during teardown
-        }
+        val playerToRelease = mediaPlayer
         mediaPlayer = null
+        if (playerToRelease != null) {
+            kotlin.concurrent.thread {
+                try {
+                    playerToRelease.reset()
+                    playerToRelease.release()
+                } catch (e: Exception) {
+                    // Ignore reset exceptions during teardown
+                }
+            }
+        }
     }
 
     private fun requestAudioFocus(): Boolean {

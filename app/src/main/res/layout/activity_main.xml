@@ -297,25 +297,25 @@
                             android:orientation="horizontal">
 
                             <ImageButton
-                                android:id="@+id/btn_player_heart"
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
+                                android:id="@+id/btn_player_folder"
+                                android:layout_width="38dp"
+                                android:layout_height="38dp"
                                 android:background="?attr/selectableItemBackgroundBorderless"
-                                android:src="@drawable/ic_favorite_border"
-                                android:tint="@color/text_primary"
-                                android:contentDescription="Favorite"
-                                android:padding="4dp" />
+                                android:src="@drawable/ic_folder"
+                                android:tint="@color/amber_light"
+                                android:contentDescription="Browse Playlist Songs"
+                                android:padding="7dp" />
 
                             <ImageButton
                                 android:id="@+id/btn_player_equalizer"
-                                android:layout_width="28dp"
-                                android:layout_height="28dp"
-                                android:layout_marginStart="6dp"
+                                android:layout_width="34dp"
+                                android:layout_height="34dp"
+                                android:layout_marginStart="4dp"
                                 android:background="?attr/selectableItemBackgroundBorderless"
                                 android:src="@drawable/ic_equalizer"
                                 android:tint="@color/text_primary"
                                 android:contentDescription="Equalizer"
-                                android:padding="4dp" />
+                                android:padding="6dp" />
                         </LinearLayout>
                     </RelativeLayout>
 
@@ -327,8 +327,8 @@
                         android:layout_marginTop="6dp"
                         android:paddingStart="0dp"
                         android:paddingEnd="0dp"
-                        android:maxHeight="3dp"
-                        android:minHeight="3dp"
+                        android:maxHeight="4dp"
+                        android:minHeight="4dp"
                         android:progressDrawable="@drawable/bg_seekbar_progress"
                         android:thumb="@drawable/bg_seekbar_thumb"
                         android:splitTrack="false" />
@@ -358,11 +358,11 @@
                             android:textSize="10sp" />
                     </RelativeLayout>
 
-                    <!-- Row 4: Controls Row (Shuffle, Prev, Play/Pause Circle, Next, Repeat) (Matching Image 4) -->
+                    <!-- Row 4: Controls Row (Shuffle, Prev, Play/Pause Circle, Next, Repeat) -->
                     <LinearLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="6dp"
+                        android:layout_height="54dp"
+                        android:layout_marginTop="4dp"
                         android:gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -370,56 +370,56 @@
                         <ImageButton
                             android:id="@+id/btn_shuffle"
                             android:layout_width="0dp"
-                            android:layout_height="32dp"
+                            android:layout_height="48dp"
                             android:layout_weight="1"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:src="@drawable/ic_shuffle"
                             android:tint="@color/text_muted"
                             android:contentDescription="Shuffle"
-                            android:padding="6dp" />
+                            android:padding="12dp" />
 
                         <!-- Previous -->
                         <ImageButton
                             android:id="@+id/btn_prev"
                             android:layout_width="0dp"
-                            android:layout_height="34dp"
+                            android:layout_height="48dp"
                             android:layout_weight="1"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:src="@drawable/ic_skip_previous"
                             android:tint="@color/text_primary"
                             android:contentDescription="Previous"
-                            android:padding="6dp" />
+                            android:padding="10dp" />
 
-                        <!-- Circular Outlined Play/Pause Button (Matching Image 4) -->
+                        <!-- Circular Outlined Play/Pause Button (54dp large touch target) -->
                         <ImageButton
                             android:id="@+id/btn_play_pause"
-                            android:layout_width="44dp"
-                            android:layout_height="44dp"
-                            android:layout_marginStart="4dp"
-                            android:layout_marginEnd="4dp"
+                            android:layout_width="54dp"
+                            android:layout_height="54dp"
+                            android:layout_marginStart="6dp"
+                            android:layout_marginEnd="6dp"
                             android:background="@drawable/bg_play_circle_outlined"
                             android:src="@drawable/ic_play_arrow"
                             android:tint="@color/text_primary"
                             android:contentDescription="Play or Pause"
-                            android:padding="8dp" />
+                            android:padding="12dp" />
 
                         <!-- Next -->
                         <ImageButton
                             android:id="@+id/btn_next"
                             android:layout_width="0dp"
-                            android:layout_height="34dp"
+                            android:layout_height="48dp"
                             android:layout_weight="1"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:src="@drawable/ic_skip_next"
                             android:tint="@color/text_primary"
                             android:contentDescription="Next"
-                            android:padding="6dp" />
+                            android:padding="10dp" />
 
                         <!-- Repeat -->
                         <ImageButton
                             android:id="@+id/btn_repeat"
                             android:layout_width="0dp"
-                            android:layout_height="32dp"
+                            android:layout_height="48dp"
                             android:layout_weight="1"
                             android:background="?attr/selectableItemBackgroundBorderless"
                             android:src="@drawable/ic_repeat"
@@ -517,48 +517,47 @@
         android:fitsSystemWindows="true"
         android:visibility="gone">
 
-        <RelativeLayout
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp">
+            android:gravity="center_vertical"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:orientation="horizontal">
 
-            <Button
+            <!-- Back Arrow Symbol Button (Circular icon without text so it never overlaps the title) -->
+            <ImageButton
                 android:id="@+id/btn_back_to_playlists"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:minHeight="38dp"
-                android:layout_centerVertical="true"
-                android:background="@drawable/bg_pill_button"
-                android:text="← Back"
-                android:textColor="@color/text_primary"
-                android:textSize="12sp"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp"
-                android:paddingTop="6dp"
-                android:paddingBottom="6dp"
-                android:includeFontPadding="false"
-                android:textAllCaps="false" />
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle_button"
+                android:src="@drawable/ic_arrow_back"
+                android:tint="@color/text_primary"
+                android:contentDescription="Back"
+                android:padding="8dp" />
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:gravity="center"
+                android:layout_weight="1"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="8dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/tv_active_playlist_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Songs"
                     android:textColor="@color/amber_light"
-                    android:textSize="16sp"
+                    android:textSize="17sp"
                     android:textStyle="bold"
                     android:maxLines="1"
                     android:ellipsize="end" />
 
-                <!-- Prominent Language Chip (Item 6) -->
+                <!-- Prominent Language Chip -->
                 <TextView
                     android:id="@+id/tv_active_playlist_lang_badge"
                     android:layout_width="wrap_content"
@@ -578,16 +577,14 @@
             <!-- Admin Options Button for playlist -->
             <ImageButton
                 android:id="@+id/btn_playlist_options"
-                android:layout_width="36dp"
-                android:layout_height="36dp"
-                android:layout_alignParentEnd="true"
-                android:layout_centerVertical="true"
-                android:background="?attr/selectableItemBackgroundBorderless"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_circle_button"
                 android:src="@drawable/ic_more_horiz"
                 android:tint="@color/text_primary"
                 android:contentDescription="Playlist Options"
                 android:padding="8dp" />
-        </RelativeLayout>
+        </LinearLayout>
 
         <!-- Admin Bulk Add Songs to Playlist Bar -->
         <LinearLayout
@@ -701,21 +698,15 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <Button
+                <ImageButton
                     android:id="@+id/btn_back_to_folders"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:minHeight="38dp"
-                    android:background="@drawable/bg_pill_button"
-                    android:text="← Folders"
-                    android:textColor="@color/text_primary"
-                    android:textSize="12sp"
-                    android:paddingStart="12dp"
-                    android:paddingEnd="12dp"
-                    android:paddingTop="6dp"
-                    android:paddingBottom="6dp"
-                    android:includeFontPadding="false"
-                    android:textAllCaps="false" />
+                    android:layout_width="38dp"
+                    android:layout_height="38dp"
+                    android:background="@drawable/bg_circle_button"
+                    android:src="@drawable/ic_arrow_back"
+                    android:tint="@color/text_primary"
+                    android:contentDescription="Back to Folders"
+                    android:padding="8dp" />
 
                 <TextView
                     android:id="@+id/tv_current_folder_name"

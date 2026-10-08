@@ -100,7 +100,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private lateinit var ivPlayerArt: ImageView
     private lateinit var tvPlayerTitle: TextView
     private lateinit var tvPlayerArtist: TextView
-    private lateinit var btnPlayerHeart: ImageButton
+    private lateinit var btnPlayerFolder: ImageButton
     private lateinit var btnPlayerEqualizer: ImageButton
     private lateinit var playerSeekBar: SeekBar
     private lateinit var tvPlayerCurrentTime: TextView
@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private lateinit var layoutPlaylistSongsView: LinearLayout
     private lateinit var tvActivePlaylistTitle: TextView
     private lateinit var tvActivePlaylistLangBadge: TextView
-    private lateinit var btnBackToPlaylists: Button
+    private lateinit var btnBackToPlaylists: ImageButton
     private lateinit var btnPlaylistOptions: ImageButton
     private lateinit var rvPlaylistSongs: RecyclerView
     private lateinit var songAdapter: PlaylistSongAdapter
@@ -141,7 +141,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
     // Folder Songs View (Drilldown inside R2 Picker)
     private lateinit var layoutR2FolderSongs: LinearLayout
-    private lateinit var btnBackToFolders: Button
+    private lateinit var btnBackToFolders: ImageButton
     private lateinit var tvCurrentFolderName: TextView
     private lateinit var btnSelectAllFolderSongs: Button
     private lateinit var etSearchR2Songs: EditText
@@ -323,7 +323,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         ivPlayerArt = findViewById(R.id.iv_player_art)
         tvPlayerTitle = findViewById(R.id.tv_player_title)
         tvPlayerArtist = findViewById(R.id.tv_player_artist)
-        btnPlayerHeart = findViewById(R.id.btn_player_heart)
+        btnPlayerFolder = findViewById(R.id.btn_player_folder)
         btnPlayerEqualizer = findViewById(R.id.btn_player_equalizer)
         playerSeekBar = findViewById(R.id.player_seek_bar)
         tvPlayerCurrentTime = findViewById(R.id.tv_player_current_time)
@@ -474,12 +474,19 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
             Toast.makeText(this, if (playerManager.isRepeatOne) "Repeat One On" else "Repeat Off", Toast.LENGTH_SHORT).show()
         }
 
-        btnPlayerHeart.setOnClickListener {
-            isFavorite = !isFavorite
-            btnPlayerHeart.setImageResource(if (isFavorite) R.drawable.ic_favorite else R.drawable.ic_favorite_border)
-            btnPlayerHeart.setColorFilter(if (isFavorite) getColor(R.color.amber_accent) else getColor(R.color.text_primary))
-            Toast.makeText(this, if (isFavorite) "Added to Favorites ♥" else "Removed from Favorites", Toast.LENGTH_SHORT).show()
+        val openCurrentPlaylist = View.OnClickListener {
+            playingPlaylist?.let { pl ->
+                openPlaylist(pl)
+            } ?: activePlaylist?.let { pl ->
+                openPlaylist(pl)
+            } ?: run {
+                openDrawer()
+            }
         }
+        btnPlayerFolder.setOnClickListener(openCurrentPlaylist)
+        tvPlayerTitle.setOnClickListener(openCurrentPlaylist)
+        tvPlayerArtist.setOnClickListener(openCurrentPlaylist)
+        ivPlayerArt.setOnClickListener(openCurrentPlaylist)
 
         btnPlayerEqualizer.setOnClickListener {
             showEqualizerDialog()

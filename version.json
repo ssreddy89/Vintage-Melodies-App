@@ -1,8 +1,8 @@
 {
-  "versionCode": 2,
-  "versionName": "1.0.1",
+  "versionCode": 3,
+  "versionName": "1.0.2",
   "apkUrl": "https://pub-e7f4f743d98b43b89671fe068ee1ee05.r2.dev/apk/Vintage-Melodies-v1.apk",
-  "changelog": "Mandatory Update: System notification player, Bluetooth & headset earbud gesture controls, background scroll opacity, and separated playlists.",
+  "changelog": "Mandatory Update: Fixed playlist back button overlap, replaced heart icon with playlist folder action, enlarged player buttons for easy tapping, and instant player start response.",
   "forceUpdate": true,
-  "minVersionCode": 2
+  "minVersionCode": 3
 }
