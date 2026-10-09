@@ -17,9 +17,11 @@
 
     <!-- Splash screen theme -->
     <style name="Theme.VintageMelodies.Splash">
-        <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">@color/splash_background</item>
-        <item name="android:navigationBarColor">@color/splash_background</item>
+        <item name="android:windowBackground">@drawable/splash_screen_art</item>
+        <item name="android:statusBarColor">#D8D9D3</item>
+        <item name="android:navigationBarColor">#CDCFCE</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
     </style>
 
     <style name="RoundedImageCorner12" parent="">
