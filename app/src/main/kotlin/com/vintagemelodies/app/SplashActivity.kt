@@ -16,7 +16,6 @@ import androidx.appcompat.app.AppCompatActivity
 class SplashActivity : AppCompatActivity() {
 
     private lateinit var splashImageView: View
-    private lateinit var splashProgress: View
     private lateinit var errorView: View
     private lateinit var retryButton: Button
 
@@ -29,14 +28,12 @@ class SplashActivity : AppCompatActivity() {
         setContentView(R.layout.activity_splash)
 
         splashImageView = findViewById(R.id.iv_splash_image)
-        splashProgress = findViewById(R.id.splash_progress)
         errorView = findViewById(R.id.splash_error)
         retryButton = findViewById(R.id.splash_retry_btn)
 
         retryButton.setOnClickListener {
             errorView.visibility = View.GONE
             splashImageView.visibility = View.VISIBLE
-            splashProgress.visibility = View.VISIBLE
             checkNetworkAndProceed()
         }
 
@@ -59,7 +56,6 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun showErrorState() {
-        splashProgress.visibility = View.GONE
         errorView.visibility = View.VISIBLE
     }
 

@@ -13,15 +13,6 @@
         android:scaleType="centerCrop"
         android:contentDescription="Vintage Melodies Splash" />
 
-    <!-- 2. Gentle Loading Indicator at the bottom -->
-    <ProgressBar
-        android:id="@+id/splash_progress"
-        android:layout_width="28dp"
-        android:layout_height="28dp"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="28dp"
-        android:indeterminateTint="#2D5A27" />
-
     <!-- 3. Offline Error View (if no internet) -->
     <LinearLayout
         android:id="@+id/splash_error"

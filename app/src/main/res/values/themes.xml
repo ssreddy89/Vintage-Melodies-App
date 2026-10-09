@@ -9,7 +9,7 @@
         <item name="colorControlHighlight">@color/player_ripple_cyan</item>
         <item name="colorControlActivated">@color/player_focus_cyan</item>
         <item name="android:statusBarColor">@color/dark_espresso</item>
-        <item name="android:navigationBarColor">@color/dark_espresso</item>
+        <item name="android:navigationBarColor">#F20A141F</item>
         <item name="android:windowBackground">@color/dark_background</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>

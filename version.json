@@ -1,8 +1,8 @@
 {
-  "versionCode": 9,
-  "versionName": "1.0.8",
+  "versionCode": 10,
+  "versionName": "1.0.9",
   "apkUrl": "https://pub-e7f4f743d98b43b89671fe068ee1ee05.r2.dev/apk/Vintage-Melodies-v1.apk",
-  "changelog": "Mandatory Update v1.0.8: Dynamic playlist background, Sound Equalizer faders & presets, Mood Playlist quick play, enhanced playlist highlighting, and cloud cover synchronization.",
+  "changelog": "Update v1.0.9: Seamless full-bleed footer navigation bar, perfect high-resolution splash screen with safe quote margins, and display polish.",
   "forceUpdate": true,
-  "minVersionCode": 9
+  "minVersionCode": 10
 }

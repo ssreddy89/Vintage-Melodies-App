@@ -31,6 +31,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -487,6 +489,30 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         btnSubmitLogin = findViewById(R.id.btn_submit_login)
 
         updateAdminUi()
+
+        // Eliminate gap between footer navigation bar and screen bottom
+        val layoutMainContent = findViewById<View>(R.id.layout_main_content)
+        val topBar = findViewById<View>(R.id.top_bar)
+        val layoutBottomNav = findViewById<View>(R.id.layout_bottom_nav)
+        ViewCompat.setOnApplyWindowInsetsListener(layoutMainContent) { _, insets ->
+            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            val navBarInsets = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
+
+            topBar.setPadding(
+                topBar.paddingLeft,
+                statusBarInsets.top,
+                topBar.paddingRight,
+                topBar.paddingBottom
+            )
+
+            layoutBottomNav.setPadding(
+                layoutBottomNav.paddingLeft,
+                layoutBottomNav.paddingTop,
+                layoutBottomNav.paddingRight,
+                navBarInsets.bottom.coerceAtLeast(0) + 4
+            )
+            insets
+        }
     }
 
     private fun setupListeners() {
