@@ -1,0 +1,311 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_dialog_card">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/background"
+        android:scaleType="centerCrop"
+        android:alpha="0.20"
+        android:contentDescription="Background" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fillViewport="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Header -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:src="@drawable/ic_equalizer"
+                    android:tint="@color/amber_accent" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginStart="10dp"
+                    android:text="Sound Equalizer"
+                    android:textColor="@color/amber_light"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_eq_enable"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:checked="true" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Fine-tune audio balance &amp; acoustic presets"
+                android:textColor="@color/text_muted"
+                android:textSize="12sp" />
+
+            <!-- Presets Section -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="8dp"
+                android:text="AUDIO PRESETS"
+                android:textColor="@color/warm_gold"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/layout_eq_presets"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <Button
+                        android:id="@+id/btn_eq_preset_warmth"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:background="@drawable/bg_pill_button_playing"
+                        android:text="📻 Warmth"
+                        android:textColor="@color/amber_accent"
+                        android:textSize="11sp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/btn_eq_preset_bass"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_pill_button"
+                        android:text="🔊 Bass Boost"
+                        android:textColor="@color/text_primary"
+                        android:textSize="11sp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/btn_eq_preset_vocal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_pill_button"
+                        android:text="🎤 Vocals"
+                        android:textColor="@color/text_primary"
+                        android:textSize="11sp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/btn_eq_preset_classical"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_pill_button"
+                        android:text="🎻 Classical"
+                        android:textColor="@color/text_primary"
+                        android:textSize="11sp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/btn_eq_preset_acoustic"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_pill_button"
+                        android:text="⚡ Acoustic"
+                        android:textColor="@color/text_primary"
+                        android:textSize="11sp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:textAllCaps="false" />
+
+                    <Button
+                        android:id="@+id/btn_eq_preset_flat"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:layout_marginStart="8dp"
+                        android:background="@drawable/bg_pill_button"
+                        android:text="🎧 Flat"
+                        android:textColor="@color/text_primary"
+                        android:textSize="11sp"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:textAllCaps="false" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <!-- Sliders Container -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_input_field"
+                android:padding="14dp"
+                android:orientation="vertical">
+
+                <!-- 1. Bass (60 Hz) -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Bass (Low End)"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_eq_bass_val"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text="+3 dB"
+                        android:textColor="@color/amber_accent"
+                        android:textSize="12sp" />
+                </RelativeLayout>
+
+                <SeekBar
+                    android:id="@+id/seek_eq_bass"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:max="100"
+                    android:progress="65"
+                    android:progressDrawable="@drawable/bg_seekbar_progress"
+                    android:thumb="@drawable/bg_seekbar_thumb" />
+
+                <!-- 2. Mid (1 kHz) -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mid (Vocals &amp; Instruments)"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_eq_mid_val"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text="+2 dB"
+                        android:textColor="@color/amber_accent"
+                        android:textSize="12sp" />
+                </RelativeLayout>
+
+                <SeekBar
+                    android:id="@+id/seek_eq_mid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="12dp"
+                    android:max="100"
+                    android:progress="60"
+                    android:progressDrawable="@drawable/bg_seekbar_progress"
+                    android:thumb="@drawable/bg_seekbar_thumb" />
+
+                <!-- 3. Treble (14 kHz) -->
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Treble (Clarity &amp; Air)"
+                        android:textColor="@color/text_primary"
+                        android:textSize="13sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_eq_treble_val"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentEnd="true"
+                        android:text="+4 dB"
+                        android:textColor="@color/amber_accent"
+                        android:textSize="12sp" />
+                </RelativeLayout>
+
+                <SeekBar
+                    android:id="@+id/seek_eq_treble"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:max="100"
+                    android:progress="70"
+                    android:progressDrawable="@drawable/bg_seekbar_progress"
+                    android:thumb="@drawable/bg_seekbar_thumb" />
+            </LinearLayout>
+
+            <!-- Action Buttons -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:gravity="end"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_eq_reset"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:background="@drawable/bg_pill_button"
+                    android:text="Reset"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btn_eq_apply"
+                    android:layout_width="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_retry_button"
+                    android:text="Apply &amp; Save"
+                    android:textColor="@color/text_primary"
+                    android:textSize="13sp"
+                    android:paddingStart="20dp"
+                    android:paddingEnd="20dp"
+                    android:textAllCaps="false" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+</FrameLayout>

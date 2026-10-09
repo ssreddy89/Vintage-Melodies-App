@@ -14,7 +14,8 @@ import java.net.URL
 
 /**
  * Syncs the catalog of songs and folders directly from Cloudflare R2 / Web API.
- * Ensures newly uploaded songs, new folders, or moved songs are immediately visible in the app.
+ * Ensures newly uploaded songs, new folders, or moved songs are immediately visible in the app,
+ * while preserving clean metadata (artist, album, year).
  */
 object CloudCatalogSyncManager {
 
@@ -50,10 +51,10 @@ object CloudCatalogSyncManager {
                             val obj = songsArray.getJSONObject(i)
                             val id = obj.optString("id", "song_$i")
                             val title = obj.optString("title", "Untitled")
-                            val artist = obj.optString("artist", "Vintage Melodies")
+                            val incomingArtist = obj.optString("artist", "")
                             val folder = obj.optString("folder", "Songs")
-                            val album = obj.optString("album", "")
-                            val year = obj.optString("year", "")
+                            val incomingAlbum = obj.optString("album", "")
+                            val incomingYear = obj.optString("year", "")
                             val mediaUrl = obj.optString("audio_url", obj.optString("media_url", ""))
                             val artworkUrl = obj.optString("artwork_url", "")
 
@@ -69,14 +70,41 @@ object CloudCatalogSyncManager {
                             val existingArtist = if (exists) checkCursor.getString(3) ?: "" else ""
                             checkCursor.close()
 
-                            val finalAlbum = if (album.isNotBlank() && !album.startsWith("Folder:")) album
-                                else if (existingAlbum.isNotBlank()) existingAlbum
-                                else "Folder: $folder"
-                            val finalYear = if (year.isNotBlank()) year else existingYear
+                            // Protect high quality metadata against folder names or 📁
+                            val isBadIncomingArtist = incomingArtist.isBlank() ||
+                                    incomingArtist.startsWith("📁") ||
+                                    incomingArtist.contains("Songs/") ||
+                                    incomingArtist.contains("SenSongs", ignoreCase = true) ||
+                                    incomingArtist.equals("Vintage Melodies", ignoreCase = true)
+
+                            val hasCleanExistingArtist = existingArtist.isNotBlank() &&
+                                    !existingArtist.startsWith("📁") &&
+                                    !existingArtist.contains("Songs/") &&
+                                    !existingArtist.contains("SenSongs", ignoreCase = true) &&
+                                    !existingArtist.equals("Vintage Melodies", ignoreCase = true)
+
+                            val finalArtist = when {
+                                hasCleanExistingArtist -> existingArtist
+                                !isBadIncomingArtist -> incomingArtist
+                                else -> ""
+                            }
+
+                            val isBadIncomingAlbum = incomingAlbum.isBlank() ||
+                                    incomingAlbum.startsWith("Folder:", ignoreCase = true) ||
+                                    incomingAlbum.startsWith("Cloudflare", ignoreCase = true)
+
+                            val hasCleanExistingAlbum = existingAlbum.isNotBlank() &&
+                                    !existingAlbum.startsWith("Folder:", ignoreCase = true) &&
+                                    !existingAlbum.startsWith("Cloudflare", ignoreCase = true)
+
+                            val finalAlbum = when {
+                                hasCleanExistingAlbum -> existingAlbum
+                                !isBadIncomingAlbum -> incomingAlbum
+                                else -> ""
+                            }
+
+                            val finalYear = if (existingYear.isNotBlank()) existingYear else incomingYear
                             val finalArtwork = if (artworkUrl.isNotBlank()) artworkUrl else existingArtwork
-                            val finalArtist = if (artist.isNotBlank() && artist != "Vintage Melodies") artist
-                                else if (existingArtist.isNotBlank()) existingArtist
-                                else artist
 
                             val cv = ContentValues().apply {
                                 put("id", id)

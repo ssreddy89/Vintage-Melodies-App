@@ -49,6 +49,8 @@ import com.vintagemelodies.app.ui.adapter.MoodPlaylistAdapter
 import com.vintagemelodies.app.ui.adapter.PicturePickerAdapter
 import com.vintagemelodies.app.ui.adapter.PlaylistSongAdapter
 import com.vintagemelodies.app.ui.adapter.R2SongPickerAdapter
+import androidx.appcompat.widget.SwitchCompat
+import com.vintagemelodies.app.player.VintageEqualizerManager
 import java.io.File
 import java.io.FileOutputStream
 
@@ -88,10 +90,14 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
     // Top Bar
     private lateinit var tvTopAdminBadge: TextView
-    private lateinit var btnTopLanguage: ImageButton
-    private lateinit var btnTopTimer: ImageButton
-    private lateinit var btnTopPlaylists: ImageButton
-    private lateinit var btnTopAdmin: ImageButton
+
+    // Bottom Navigation Bar
+    private lateinit var btnNavLanguage: View
+    private lateinit var btnNavTimer: View
+    private lateinit var btnNavPlaylists: View
+    private lateinit var btnNavLogin: View
+    private lateinit var ivNavLogin: ImageView
+    private lateinit var tvNavLogin: TextView
 
     // Mood Section
     private lateinit var layoutMoodSection: View
@@ -118,7 +124,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private var isFavorite: Boolean = false
 
     // Playlists Drawer
-    private lateinit var layoutDrawerPlaylists: LinearLayout
+    private lateinit var layoutDrawerPlaylists: View
     private lateinit var rvDrawerPlaylists: RecyclerView
     private lateinit var drawerAdapter: DrawerPlaylistAdapter
     private lateinit var btnCloseDrawer: ImageButton
@@ -126,7 +132,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private lateinit var btnAdminSyncCloud: Button
 
     // Playlist Songs View
-    private lateinit var layoutPlaylistSongsView: LinearLayout
+    private lateinit var layoutPlaylistSongsView: View
     private lateinit var tvActivePlaylistTitle: TextView
     private lateinit var tvActivePlaylistLangBadge: TextView
     private lateinit var btnBackToPlaylists: ImageButton
@@ -137,7 +143,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     private lateinit var btnAdminAddR2Songs: Button
 
     // Cloudflare R2 Folder & Song Picker
-    private lateinit var layoutR2Picker: LinearLayout
+    private lateinit var layoutR2Picker: View
     private lateinit var tvR2PickerTitle: TextView
     private lateinit var tvR2PickerSubtitle: TextView
     private lateinit var btnCloseR2Picker: ImageButton
@@ -318,10 +324,14 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
         // Top Bar
         tvTopAdminBadge = findViewById(R.id.tv_top_admin_badge)
-        btnTopLanguage = findViewById(R.id.btn_top_language)
-        btnTopTimer = findViewById(R.id.btn_top_timer)
-        btnTopPlaylists = findViewById(R.id.btn_top_playlists)
-        btnTopAdmin = findViewById(R.id.btn_top_admin)
+
+        // Bottom Navigation Bar
+        btnNavLanguage = findViewById(R.id.btn_nav_language)
+        btnNavTimer = findViewById(R.id.btn_nav_timer)
+        btnNavPlaylists = findViewById(R.id.btn_nav_playlists)
+        btnNavLogin = findViewById(R.id.btn_nav_login)
+        ivNavLogin = findViewById(R.id.iv_nav_login)
+        tvNavLogin = findViewById(R.id.tv_nav_login)
 
         // Mood Carousel Section
         layoutMoodSection = findViewById(R.id.layout_mood_section)
@@ -331,7 +341,28 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         rvMoodPlaylists.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         rvMoodPlaylists.setHasFixedSize(true)
         rvMoodPlaylists.isNestedScrollingEnabled = false
-        moodAdapter = MoodPlaylistAdapter(emptyList()) { playlist -> openPlaylist(playlist) }
+        moodAdapter = MoodPlaylistAdapter(
+            emptyList(),
+            onItemClick = { playlist -> openPlaylist(playlist) },
+            onPlayClick = { playlist ->
+                if (playingPlaylist?.id == playlist.id) {
+                    playerManager.togglePlayPause()
+                } else {
+                    val songs = repository.getSongsForPlaylist(playlist.id)
+                    if (songs.isNotEmpty()) {
+                        activePlaylist = playlist
+                        playingPlaylist = playlist
+                        updateAppBackground(playlist)
+                        playerManager.playQueue(songs, 0)
+                        saveLastPlayedSession(playlist.id, songs[0].id, 0)
+                        moodAdapter.setPlayingPlaylistId(playlist.id, true)
+                        drawerAdapter.setPlayingPlaylistId(playlist.id, true)
+                    } else {
+                        openPlaylist(playlist)
+                    }
+                }
+            }
+        )
         rvMoodPlaylists.adapter = moodAdapter
 
         // Semi-Transparent Neon Bottom Player
@@ -383,14 +414,37 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         songAdapter = PlaylistSongAdapter(
             emptyList(),
             onItemClick = { song, index ->
-                activePlaylist?.let { pl ->
-                    playingPlaylist = pl
-                    val songs = repository.getSongsForPlaylist(pl.id)
-                    playerManager.playQueue(songs, index)
-                    updateAppBackground(pl)
-                    saveLastPlayedSession(pl.id, song.id, index)
-                } ?: run {
-                    playerManager.playSong(song)
+                if (playerManager.getCurrentSong()?.id == song.id) {
+                    playerManager.togglePlayPause()
+                } else {
+                    activePlaylist?.let { pl ->
+                        playingPlaylist = pl
+                        val songs = songAdapter.getSongs()
+                        playerManager.playQueue(songs, index)
+                        updateAppBackground(pl)
+                        saveLastPlayedSession(pl.id, song.id, index)
+                        moodAdapter.setPlayingPlaylistId(pl.id, true)
+                        drawerAdapter.setPlayingPlaylistId(pl.id, true)
+                    } ?: run {
+                        playerManager.playSong(song)
+                    }
+                }
+            },
+            onPlayPauseClick = { song, index ->
+                if (playerManager.getCurrentSong()?.id == song.id) {
+                    playerManager.togglePlayPause()
+                } else {
+                    activePlaylist?.let { pl ->
+                        playingPlaylist = pl
+                        val songs = songAdapter.getSongs()
+                        playerManager.playQueue(songs, index)
+                        updateAppBackground(pl)
+                        saveLastPlayedSession(pl.id, song.id, index)
+                        moodAdapter.setPlayingPlaylistId(pl.id, true)
+                        drawerAdapter.setPlayingPlaylistId(pl.id, true)
+                    } ?: run {
+                        playerManager.playSong(song)
+                    }
                 }
             },
             onItemLongClick = { song ->
@@ -436,10 +490,10 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     }
 
     private fun setupListeners() {
-        btnTopLanguage.setOnClickListener { showLanguageSelectionDialog(isFirstTime = false) }
-        btnTopTimer.setOnClickListener { showSleepTimerDialog() }
+        btnNavLanguage.setOnClickListener { showLanguageSelectionDialog(isFirstTime = false) }
+        btnNavTimer.setOnClickListener { showSleepTimerDialog() }
 
-        btnTopPlaylists.setOnClickListener {
+        btnNavPlaylists.setOnClickListener {
             if (layoutMoodSection.visibility == View.GONE) {
                 layoutMoodSection.visibility = View.VISIBLE
             } else {
@@ -451,7 +505,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         btnCloseMoodSection.setOnClickListener { layoutMoodSection.visibility = View.GONE }
         btnCloseDrawer.setOnClickListener { layoutDrawerPlaylists.visibility = View.GONE }
 
-        btnTopAdmin.setOnClickListener {
+        btnNavLogin.setOnClickListener {
             if (isAdmin) {
                 showAdminMenu()
             } else {
@@ -491,12 +545,35 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         }
 
         val openCurrentPlaylist = View.OnClickListener {
-            playingPlaylist?.let { pl ->
-                openPlaylist(pl)
-            } ?: activePlaylist?.let { pl ->
-                openPlaylist(pl)
-            } ?: run {
-                openDrawer()
+            val curSong = playerManager.getCurrentSong()
+            val targetPlaylist = playingPlaylist
+                ?: activePlaylist
+                ?: curSong?.let { s ->
+                    repository.getAllPlaylists().firstOrNull { pl ->
+                        repository.getSongsForPlaylist(pl.id).any { it.id == s.id }
+                    }
+                }
+
+            if (targetPlaylist != null) {
+                openPlaylist(targetPlaylist)
+            } else {
+                val queue = playerManager.getQueue()
+                if (queue.isNotEmpty()) {
+                    activePlaylist = null
+                    tvActivePlaylistTitle.text = "Now Playing"
+                    tvActivePlaylistLangBadge.text = "QUEUE"
+                    songAdapter.updateData(queue)
+                    songAdapter.setPlayingSong(curSong?.id, playerManager.isPlaying())
+                    layoutPlaylistSongsView.visibility = View.VISIBLE
+                    layoutDrawerPlaylists.visibility = View.GONE
+                    layoutAdminPlaylistBar.visibility = View.GONE
+                    val playingIdx = queue.indexOfFirst { it.id == curSong?.id }
+                    if (playingIdx >= 0) {
+                        rvPlaylistSongs.post { rvPlaylistSongs.scrollToPosition(playingIdx) }
+                    }
+                } else {
+                    openDrawer()
+                }
             }
         }
         btnPlayerFolder.setOnClickListener(openCurrentPlaylist)
@@ -669,22 +746,87 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
             .putLong(KEY_LAST_PLAYLIST_ID, playlistId)
             .putString(KEY_LAST_SONG_ID, songId)
             .putInt(KEY_LAST_SONG_INDEX, songIndex)
-            .apply()
+            .commit()
     }
 
     private fun restoreLastPlayedSession() {
         val prefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         val lastPlaylistId = prefs.getLong(KEY_LAST_PLAYLIST_ID, -1L)
-        if (lastPlaylistId != -1L) {
-            val pl = repository.getPlaylistById(lastPlaylistId)
+        val lastSongId = prefs.getString(KEY_LAST_SONG_ID, null)
+        val lastSongIndexPref = prefs.getInt(KEY_LAST_SONG_INDEX, 0)
+
+        var pl: Playlist? = if (lastPlaylistId != -1L) repository.getPlaylistById(lastPlaylistId) else null
+        var playlistSongs = if (pl != null) repository.getSongsForPlaylist(pl.id) else emptyList()
+
+        // Fallback 1: If saved playlist has no songs or wasn't found, search all playlists for lastSongId
+        if (playlistSongs.isEmpty() && !lastSongId.isNullOrEmpty()) {
+            val allPlaylists = repository.getAllPlaylists()
+            for (candidate in allPlaylists) {
+                val candidateSongs = repository.getSongsForPlaylist(candidate.id)
+                if (candidateSongs.any { it.id == lastSongId }) {
+                    pl = candidate
+                    playlistSongs = candidateSongs
+                    break
+                }
+            }
+        }
+
+        // Fallback 2: Pick first non-empty playlist
+        if (playlistSongs.isEmpty()) {
+            val allPlaylists = repository.getAllPlaylists()
+            for (candidate in allPlaylists) {
+                val candidateSongs = repository.getSongsForPlaylist(candidate.id)
+                if (candidateSongs.isNotEmpty()) {
+                    pl = candidate
+                    playlistSongs = candidateSongs
+                    break
+                }
+            }
+        }
+
+        if (playlistSongs.isNotEmpty()) {
+            activePlaylist = pl
+            playingPlaylist = pl
+
+            val targetIndex = if (!lastSongId.isNullOrEmpty()) {
+                val foundIdx = playlistSongs.indexOfFirst { it.id == lastSongId }
+                if (foundIdx >= 0) foundIdx else lastSongIndexPref.coerceIn(0, playlistSongs.size - 1)
+            } else {
+                lastSongIndexPref.coerceIn(0, playlistSongs.size - 1)
+            }
+
+            playerManager.prepareQueue(playlistSongs, targetIndex)
+            updateAppBackground(pl)
             if (pl != null) {
-                val songs = repository.getSongsForPlaylist(pl.id)
-                if (songs.isNotEmpty()) {
-                    activePlaylist = pl
-                    playingPlaylist = pl
-                    val lastSongIndex = prefs.getInt(KEY_LAST_SONG_INDEX, 0).coerceIn(0, songs.size - 1)
-                    playerManager.prepareQueue(songs, lastSongIndex)
-                    updateAppBackground(pl)
+                moodAdapter.setPlayingPlaylistId(pl.id, false)
+                drawerAdapter.setPlayingPlaylistId(pl.id, false)
+            }
+            val cur = playerManager.getCurrentSong()
+            if (cur != null) {
+                tvPlayerTitle.text = cur.title
+                val details = cur.getDetailsInfo()
+                tvPlayerArtist.text = if (details.isNotBlank()) details else "Vintage Melodies"
+                songAdapter.setPlayingSong(cur.id, false)
+                SongArtworkHelper.loadSongArt(ivPlayerArt, cur)
+            }
+        } else {
+            // Absolute fallback: all songs in repository
+            val allSongs = repository.getAllSongs()
+            if (allSongs.isNotEmpty()) {
+                val targetIndex = if (!lastSongId.isNullOrEmpty()) {
+                    val foundIdx = allSongs.indexOfFirst { it.id == lastSongId }
+                    if (foundIdx >= 0) foundIdx else 0
+                } else {
+                    0
+                }
+                playerManager.prepareQueue(allSongs, targetIndex)
+                val cur = playerManager.getCurrentSong()
+                if (cur != null) {
+                    tvPlayerTitle.text = cur.title
+                    val details = cur.getDetailsInfo()
+                    tvPlayerArtist.text = if (details.isNotBlank()) details else "Vintage Melodies"
+                    songAdapter.setPlayingSong(cur.id, false)
+                    SongArtworkHelper.loadSongArt(ivPlayerArt, cur)
                 }
             }
         }
@@ -701,8 +843,23 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
                 repository.getPlaylistsByLanguages(userLangs)
             }
         }
+
+        // Re-resolve playingPlaylist so it is NEVER lost, even across syncs or multiple closes/opens
+        val curSongId = playerManager.getCurrentSong()?.id
+        if (playingPlaylist != null) {
+            playingPlaylist = playlists.firstOrNull { it.id == playingPlaylist?.id }
+                ?: playlists.firstOrNull { it.name.equals(playingPlaylist?.name, ignoreCase = true) }
+                ?: (if (curSongId != null) playlists.firstOrNull { pl -> repository.getSongsForPlaylist(pl.id).any { s -> s.id == curSongId } } else null)
+                ?: playingPlaylist
+        } else if (curSongId != null) {
+            playingPlaylist = playlists.firstOrNull { pl -> repository.getSongsForPlaylist(pl.id).any { s -> s.id == curSongId } }
+        }
+
         moodAdapter.updateData(playlists)
         drawerAdapter.updateData(playlists)
+        val isPlaying = playerManager.isPlaying()
+        moodAdapter.setPlayingPlaylistId(playingPlaylist?.id, isPlaying)
+        drawerAdapter.setPlayingPlaylistId(playingPlaylist?.id, isPlaying)
     }
 
     private fun openDrawer() {
@@ -720,26 +877,50 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         tvActivePlaylistTitle.text = playlist.name
         tvActivePlaylistLangBadge.text = playlist.language.uppercase()
 
-        val songs = repository.getSongsForPlaylist(playlist.id)
+        var songs = repository.getSongsForPlaylist(playlist.id)
+        if (songs.isEmpty() && playingPlaylist?.id == playlist.id) {
+            val queue = playerManager.getQueue()
+            if (queue.isNotEmpty()) songs = queue
+        }
         songAdapter.updateData(songs)
+        songAdapter.setPlayingSong(playerManager.getCurrentSong()?.id, playerManager.isPlaying())
         layoutPlaylistSongsView.visibility = View.VISIBLE
+        layoutDrawerPlaylists.visibility = View.GONE
         layoutAdminPlaylistBar.visibility = if (isAdmin) View.VISIBLE else View.GONE
+
+        // Scroll to currently playing song if viewing the playing playlist
+        if (playingPlaylist?.id == playlist.id) {
+            val curId = playerManager.getCurrentSong()?.id
+            val sortedList = songAdapter.getSongs()
+            val playingIdx = sortedList.indexOfFirst { it.id == curId }
+            if (playingIdx >= 0) {
+                rvPlaylistSongs.post {
+                    rvPlaylistSongs.scrollToPosition(playingIdx)
+                }
+            }
+        }
     }
 
     private fun updateAppBackground(playlist: Playlist?) {
-        if (playlist == null) {
-            Glide.with(this).load(R.drawable.background).centerCrop().into(ivMainBackground)
-            return
-        }
+        val targetPlaylist = playlist ?: playingPlaylist
+        if (targetPlaylist != null) {
+            val hasValidCoverUrl = targetPlaylist.coverUrl.isNotBlank() &&
+                (targetPlaylist.coverUrl.startsWith("http") || targetPlaylist.coverUrl.startsWith("data:") || File(targetPlaylist.coverUrl).exists())
+            val fallbackRes = if (targetPlaylist.coverResId != 0) targetPlaylist.coverResId else R.drawable.background
+            val loadTarget: Any = if (hasValidCoverUrl) targetPlaylist.coverUrl else fallbackRes
 
-        val loadTarget: Any = if (playlist.coverUrl.isNotBlank()) playlist.coverUrl else {
-            if (playlist.coverResId != 0) playlist.coverResId else R.drawable.background
+            Glide.with(this)
+                .load(loadTarget)
+                .centerCrop()
+                .placeholder(R.drawable.background)
+                .error(R.drawable.background)
+                .into(ivMainBackground)
+        } else {
+            Glide.with(this)
+                .load(R.drawable.background)
+                .centerCrop()
+                .into(ivMainBackground)
         }
-
-        Glide.with(this)
-            .load(loadTarget)
-            .centerCrop()
-            .into(ivMainBackground)
     }
 
     // ── First-Time User Language Selection (Item 1 & 6) ──────────────────────
@@ -785,6 +966,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
             .setView(view)
             .setCancelable(!isFirstTime)
             .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         btnSave.setOnClickListener {
             val selected = mutableSetOf<String>()
@@ -902,6 +1084,7 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         val dialog = AlertDialog.Builder(this)
             .setView(view)
             .create()
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
 
         btnCancel.setOnClickListener { dialog.dismiss() }
 
@@ -1101,28 +1284,164 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
     // ── Equalizer Dialog ─────────────────────────────────────────────────────
 
     private fun showEqualizerDialog() {
-        val presets = arrayOf(
-            "📻 Vintage Melodies Warmth (Default)",
-            "🔊 Deep Bass Boost",
-            "🎤 Clear Vocals",
-            "🎻 Classic Instrumental",
-            "⚡ Acoustic Live",
-            "🎧 Flat / Studio Reference"
+        val audioSessionId = playerManager.getAudioSessionId()
+        if (audioSessionId > 0) {
+            VintageEqualizerManager.bindSession(audioSessionId, this)
+        }
+
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_equalizer, null)
+        val dialog = AlertDialog.Builder(this)
+            .setView(dialogView)
+            .create()
+
+        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
+
+        val switchEnable: SwitchCompat = dialogView.findViewById(R.id.switch_eq_enable)
+        val btnWarmth: Button = dialogView.findViewById(R.id.btn_eq_preset_warmth)
+        val btnBass: Button = dialogView.findViewById(R.id.btn_eq_preset_bass)
+        val btnVocal: Button = dialogView.findViewById(R.id.btn_eq_preset_vocal)
+        val btnClassical: Button = dialogView.findViewById(R.id.btn_eq_preset_classical)
+        val btnAcoustic: Button = dialogView.findViewById(R.id.btn_eq_preset_acoustic)
+        val btnFlat: Button = dialogView.findViewById(R.id.btn_eq_preset_flat)
+
+        val seekBass: SeekBar = dialogView.findViewById(R.id.seek_eq_bass)
+        val tvBassVal: TextView = dialogView.findViewById(R.id.tv_eq_bass_val)
+        val seekMid: SeekBar = dialogView.findViewById(R.id.seek_eq_mid)
+        val tvMidVal: TextView = dialogView.findViewById(R.id.tv_eq_mid_val)
+        val seekTreble: SeekBar = dialogView.findViewById(R.id.seek_eq_treble)
+        val tvTrebleVal: TextView = dialogView.findViewById(R.id.tv_eq_treble_val)
+
+        val btnReset: Button = dialogView.findViewById(R.id.btn_eq_reset)
+        val btnApply: Button = dialogView.findViewById(R.id.btn_eq_apply)
+
+        fun formatDb(progress: Int): String {
+            val db = ((progress - 50) * 12) / 50
+            return if (db > 0) "+$db dB" else "$db dB"
+        }
+
+        fun updateDbLabels() {
+            tvBassVal.text = formatDb(seekBass.progress)
+            tvMidVal.text = formatDb(seekMid.progress)
+            tvTrebleVal.text = formatDb(seekTreble.progress)
+        }
+
+        val presetButtons = listOf(
+            "Warmth" to btnWarmth,
+            "Bass Boost" to btnBass,
+            "Vocals" to btnVocal,
+            "Classical" to btnClassical,
+            "Acoustic" to btnAcoustic,
+            "Flat" to btnFlat
         )
-        AlertDialog.Builder(this)
-            .setTitle("Equalizer Sound Profile")
-            .setItems(presets) { _, which ->
-                Toast.makeText(this, "Equalizer activated: ${presets[which]}", Toast.LENGTH_SHORT).show()
+
+        var selectedPreset = VintageEqualizerManager.getSavedPreset(this)
+
+        fun highlightPreset(name: String) {
+            selectedPreset = name
+            presetButtons.forEach { (presetName, btn) ->
+                if (presetName.equals(name, ignoreCase = true)) {
+                    btn.setBackgroundResource(R.drawable.bg_pill_button_playing)
+                    btn.setTextColor(getColor(R.color.amber_accent))
+                } else {
+                    btn.setBackgroundResource(R.drawable.bg_pill_button)
+                    btn.setTextColor(getColor(R.color.text_primary))
+                }
             }
-            .setNegativeButton("Close", null)
-            .show()
+        }
+
+        fun applyCurrent(presetName: String) {
+            VintageEqualizerManager.applyBands(
+                seekBass.progress,
+                seekMid.progress,
+                seekTreble.progress,
+                presetName,
+                this
+            )
+        }
+
+        // Initialize state
+        switchEnable.isChecked = VintageEqualizerManager.isEnabled(this)
+        seekBass.progress = VintageEqualizerManager.getSavedBass(this)
+        seekMid.progress = VintageEqualizerManager.getSavedMid(this)
+        seekTreble.progress = VintageEqualizerManager.getSavedTreble(this)
+        updateDbLabels()
+        highlightPreset(selectedPreset)
+
+        fun setEnabledUi(enabled: Boolean) {
+            seekBass.isEnabled = enabled
+            seekMid.isEnabled = enabled
+            seekTreble.isEnabled = enabled
+            presetButtons.forEach { (_, btn) -> btn.isEnabled = enabled }
+        }
+        setEnabledUi(switchEnable.isChecked)
+
+        switchEnable.setOnCheckedChangeListener { _, isChecked ->
+            VintageEqualizerManager.setEnabled(isChecked, this)
+            setEnabledUi(isChecked)
+            if (isChecked) {
+                applyCurrent(selectedPreset)
+            }
+        }
+
+        fun selectPresetValues(presetName: String, bass: Int, mid: Int, treble: Int) {
+            seekBass.progress = bass
+            seekMid.progress = mid
+            seekTreble.progress = treble
+            updateDbLabels()
+            highlightPreset(presetName)
+            applyCurrent(presetName)
+        }
+
+        btnWarmth.setOnClickListener { selectPresetValues("Warmth", 65, 60, 70) }
+        btnBass.setOnClickListener { selectPresetValues("Bass Boost", 90, 55, 45) }
+        btnVocal.setOnClickListener { selectPresetValues("Vocals", 40, 80, 65) }
+        btnClassical.setOnClickListener { selectPresetValues("Classical", 55, 50, 75) }
+        btnAcoustic.setOnClickListener { selectPresetValues("Acoustic", 60, 65, 65) }
+        btnFlat.setOnClickListener { selectPresetValues("Flat", 50, 50, 50) }
+
+        val seekListener = object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (fromUser) {
+                    updateDbLabels()
+                    highlightPreset("Custom")
+                    applyCurrent("Custom")
+                }
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        }
+
+        seekBass.setOnSeekBarChangeListener(seekListener)
+        seekMid.setOnSeekBarChangeListener(seekListener)
+        seekTreble.setOnSeekBarChangeListener(seekListener)
+
+        btnReset.setOnClickListener {
+            selectPresetValues("Flat", 50, 50, 50)
+            Toast.makeText(this, "Equalizer reset to Flat", Toast.LENGTH_SHORT).show()
+        }
+
+        btnApply.setOnClickListener {
+            applyCurrent(selectedPreset)
+            Toast.makeText(this, "Equalizer settings saved! 🎵", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
+
+        dialog.show()
     }
 
     // ── Admin Dialogs & Actions (Item 5: Edit Playlist Action) ────────────────
 
     private fun updateAdminUi() {
         tvTopAdminBadge.visibility = if (isAdmin) View.VISIBLE else View.GONE
-        btnTopAdmin.setColorFilter(if (isAdmin) getColor(R.color.amber_accent) else getColor(R.color.text_primary))
+        if (isAdmin) {
+            tvNavLogin.text = "Admin"
+            tvNavLogin.setTextColor(getColor(R.color.amber_light))
+            ivNavLogin.setColorFilter(getColor(R.color.amber_light))
+        } else {
+            tvNavLogin.text = "Login"
+            tvNavLogin.setTextColor(getColor(R.color.text_muted))
+            ivNavLogin.setColorFilter(getColor(R.color.text_muted))
+        }
         btnAdminCreatePlaylist.visibility = if (isAdmin) View.VISIBLE else View.GONE
         btnAdminSyncCloud.visibility = if (isAdmin) View.VISIBLE else View.GONE
         layoutAdminPlaylistBar.visibility = if (isAdmin && layoutPlaylistSongsView.visibility == View.VISIBLE) View.VISIBLE else View.GONE
@@ -1238,13 +1557,24 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
     override fun onSongChanged(song: Song) {
         tvPlayerTitle.text = song.title
-        val playlistInfo = playingPlaylist?.let { "${it.name} • " } ?: ""
-        val songInfo = when {
-            song.year.isNotBlank() && song.artist.isNotBlank() -> "${song.artist} (${song.year})"
-            song.album.isNotBlank() && !song.album.startsWith("Folder:") && !song.album.startsWith("Cloudflare R2:") -> "${song.artist} • ${song.album}"
-            else -> song.artist
+        val details = song.getDetailsInfo()
+        tvPlayerArtist.text = if (details.isNotBlank()) details else "Vintage Melodies"
+
+        // Update active playing song and playlist across all lists
+        songAdapter.setPlayingSong(song.id, true)
+        moodAdapter.setPlayingPlaylistId(playingPlaylist?.id, true)
+        drawerAdapter.setPlayingPlaylistId(playingPlaylist?.id, true)
+
+        // Attach Equalizer to active audio session
+        val audioSessionId = playerManager.getAudioSessionId()
+        if (audioSessionId > 0) {
+            VintageEqualizerManager.bindSession(audioSessionId, this)
         }
-        tvPlayerArtist.text = "$playlistInfo$songInfo"
+
+        // Persist session immediately on track change
+        val plId = playingPlaylist?.id ?: -1L
+        val curIdx = playerManager.getCurrentIndex()
+        saveLastPlayedSession(plId, song.id, curIdx)
 
         currentSongArtBitmap = null
         currentSongArtPath = null
@@ -1264,10 +1594,13 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
             )
         }
 
-        // Update app background
-        playingPlaylist?.let { pl ->
-            updateAppBackground(pl)
-        }
+        // Update app background with playing playlist artwork
+        val currentPl = playingPlaylist
+            ?: activePlaylist
+            ?: repository.getAllPlaylists().firstOrNull { pl ->
+                repository.getSongsForPlaylist(pl.id).any { it.id == song.id }
+            }
+        updateAppBackground(currentPl)
 
         btnPlayPause.setImageResource(R.drawable.ic_pause)
 
@@ -1282,6 +1615,9 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
 
     override fun onPlaybackStateChanged(isPlaying: Boolean) {
         btnPlayPause.setImageResource(if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow)
+        songAdapter.setPlayingSong(playerManager.getCurrentSong()?.id, isPlaying)
+        moodAdapter.setPlayingPlaylistId(playingPlaylist?.id, isPlaying)
+        drawerAdapter.setPlayingPlaylistId(playingPlaylist?.id, isPlaying)
 
         // Update Media Playback Notification (Item 6)
         MusicPlaybackService.updateNotification(
@@ -1336,8 +1672,21 @@ class MainActivity : AppCompatActivity(), AudioPlayerManager.PlaybackListener {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        val curSong = playerManager.getCurrentSong()
+        if (curSong != null) {
+            saveLastPlayedSession(
+                playingPlaylist?.id ?: -1L,
+                curSong.id,
+                playerManager.getCurrentIndex()
+            )
+        }
+    }
+
     override fun onDestroy() {
         playerManager.stop()
+        VintageEqualizerManager.release()
         MusicPlaybackService.stopService(this)
         try {
             networkCallback?.let { connectivityManager?.unregisterNetworkCallback(it) }

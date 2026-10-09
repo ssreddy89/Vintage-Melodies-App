@@ -61,16 +61,33 @@ object CloudPlaylistSyncManager {
 
                         db.beginTransaction()
                         try {
-                            // Clear existing local playlists & assignments to sync exactly with master cloud copy
-                            db.delete(VintageDatabaseHelper.TABLE_PLAYLIST_SONGS, null, null)
-                            db.delete(VintageDatabaseHelper.TABLE_PLAYLISTS, null, null)
+                            // Track active cloud playlist names to remove deleted ones without churning IDs
+                            val incomingNames = mutableSetOf<String>()
 
                             for (i in 0 until playlistsArray.length()) {
                                 val pObj = playlistsArray.getJSONObject(i)
                                 val name = pObj.optString("name", "Playlist ${i + 1}")
                                 val lang = pObj.optString("language", "Telugu")
-                                val coverRes = pObj.optInt("cover_res_id", R.drawable.vm_art_village)
+                                val coverResName = pObj.optString("cover_res_name", "")
+                                val coverRes = if (coverResName.isNotBlank()) {
+                                    PlaylistCoverHelper.getDrawableResByName(coverResName)
+                                } else {
+                                    pObj.optInt("cover_res_id", R.drawable.vm_art_village)
+                                }
                                 val coverUrl = pObj.optString("cover_url", "")
+                                incomingNames.add(name.lowercase())
+
+                                // Check if this playlist already exists locally to preserve ID
+                                val cursor = db.query(
+                                    VintageDatabaseHelper.TABLE_PLAYLISTS,
+                                    arrayOf("id"),
+                                    "LOWER(name) = ?",
+                                    arrayOf(name.lowercase()),
+                                    null, null, null
+                                )
+
+                                val existingId: Long? = if (cursor.moveToFirst()) cursor.getLong(0) else null
+                                cursor.close()
 
                                 val pCv = ContentValues().apply {
                                     put("name", name)
@@ -78,14 +95,32 @@ object CloudPlaylistSyncManager {
                                     put("cover_res_id", coverRes)
                                     put("cover_url", coverUrl)
                                 }
-                                val newId = db.insert(VintageDatabaseHelper.TABLE_PLAYLISTS, null, pCv)
+
+                                val playlistId = if (existingId != null) {
+                                    db.update(
+                                        VintageDatabaseHelper.TABLE_PLAYLISTS,
+                                        pCv,
+                                        "id = ?",
+                                        arrayOf(existingId.toString())
+                                    )
+                                    existingId
+                                } else {
+                                    db.insert(VintageDatabaseHelper.TABLE_PLAYLISTS, null, pCv)
+                                }
+
+                                // Update song assignments for this playlist
+                                db.delete(
+                                    VintageDatabaseHelper.TABLE_PLAYLIST_SONGS,
+                                    "playlist_id = ?",
+                                    arrayOf(playlistId.toString())
+                                )
 
                                 val songsArray = pObj.optJSONArray("song_ids")
                                 if (songsArray != null && songsArray.length() > 0) {
                                     for (s in 0 until songsArray.length()) {
                                         val songId = songsArray.getString(s)
                                         val psCv = ContentValues().apply {
-                                            put("playlist_id", newId)
+                                            put("playlist_id", playlistId)
                                             put("song_id", songId)
                                             put("sort_order", s)
                                         }
@@ -94,6 +129,23 @@ object CloudPlaylistSyncManager {
                                 }
                                 count++
                             }
+
+                            // Clean up local playlists that no longer exist in cloud
+                            val allCursor = db.query(
+                                VintageDatabaseHelper.TABLE_PLAYLISTS,
+                                arrayOf("id", "name"),
+                                null, null, null, null, null
+                            )
+                            while (allCursor.moveToNext()) {
+                                val pId = allCursor.getLong(0)
+                                val pName = allCursor.getString(1)
+                                if (!incomingNames.contains(pName.lowercase())) {
+                                    db.delete(VintageDatabaseHelper.TABLE_PLAYLIST_SONGS, "playlist_id = ?", arrayOf(pId.toString()))
+                                    db.delete(VintageDatabaseHelper.TABLE_PLAYLISTS, "id = ?", arrayOf(pId.toString()))
+                                }
+                            }
+                            allCursor.close()
+
                             db.setTransactionSuccessful()
                             success = true
                         } finally {
@@ -130,11 +182,21 @@ object CloudPlaylistSyncManager {
 
                 for (p in playlists) {
                     val songs = repository.getSongsForPlaylist(p.id).map { it.id }
+                    val coverResName = PlaylistCoverHelper.getDrawableName(p.coverResId)
+                    val coverPayload = if (p.coverUrl.startsWith("data:") || p.coverUrl.startsWith("http")) {
+                        p.coverUrl
+                    } else if (p.coverUrl.isNotBlank() && java.io.File(p.coverUrl).exists()) {
+                        PlaylistCoverHelper.encodeFileToBase64DataUri(p.coverUrl) ?: p.coverUrl
+                    } else {
+                        p.coverUrl
+                    }
+
                     val obj = JSONObject().apply {
                         put("name", p.name)
                         put("language", p.language)
+                        put("cover_res_name", coverResName)
                         put("cover_res_id", p.coverResId)
-                        put("cover_url", p.coverUrl)
+                        put("cover_url", coverPayload)
                         put("song_ids", JSONArray(songs))
                     }
                     array.put(obj)

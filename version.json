@@ -1,8 +1,8 @@
 {
-  "versionCode": 8,
-  "versionName": "1.0.7",
+  "versionCode": 9,
+  "versionName": "1.0.8",
   "apkUrl": "https://pub-e7f4f743d98b43b89671fe068ee1ee05.r2.dev/apk/Vintage-Melodies-v1.apk",
-  "changelog": "Mandatory Update v1.0.7: Central Cloud Playlist Sync enabled! Playlists created, edited, or deleted by Admins now automatically synchronize across all devices. Common users always see and listen to the master playlists.",
+  "changelog": "Mandatory Update v1.0.8: Dynamic playlist background, Sound Equalizer faders & presets, Mood Playlist quick play, enhanced playlist highlighting, and cloud cover synchronization.",
   "forceUpdate": true,
-  "minVersionCode": 8
+  "minVersionCode": 9
 }

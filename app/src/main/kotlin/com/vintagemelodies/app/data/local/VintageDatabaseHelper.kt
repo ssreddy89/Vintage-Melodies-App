@@ -16,7 +16,7 @@ class VintageDatabaseHelper(private val context: Context) :
 
     companion object {
         const val DATABASE_NAME = "vintage_melodies_standalone.db"
-        const val DATABASE_VERSION = 8
+        const val DATABASE_VERSION = 9
 
         const val TABLE_SONGS = "songs"
         const val TABLE_PLAYLISTS = "playlists"
@@ -78,6 +78,8 @@ class VintageDatabaseHelper(private val context: Context) :
             try {
                 db.execSQL("ALTER TABLE $TABLE_SONGS ADD COLUMN artwork_url TEXT DEFAULT ''")
             } catch (_: Exception) {}
+        }
+        if (oldVersion < 9) {
             preSeedSongsOnly(db)
         }
     }
@@ -103,9 +105,9 @@ class VintageDatabaseHelper(private val context: Context) :
                 val songObj = songsArray.getJSONObject(i)
                 val id = songObj.optString("id", "song_$i")
                 val title = songObj.optString("title", "Untitled")
-                val artist = songObj.optString("artist", "Vintage Melodies")
+                val artist = songObj.optString("artist", "")
                 val folder = songObj.optString("folder", "Songs")
-                val album = songObj.optString("album", "Cloudflare R2: $folder")
+                val album = songObj.optString("album", "")
                 val year = songObj.optString("year", "")
                 val mediaUrl = songObj.optString("audio_url", songObj.optString("media_url", ""))
                 val artworkUrl = songObj.optString("artwork_url", "")
@@ -157,9 +159,9 @@ class VintageDatabaseHelper(private val context: Context) :
                 val songObj = songsArray.getJSONObject(i)
                 val id = songObj.optString("id", "song_$i")
                 val title = songObj.optString("title", "Untitled")
-                val artist = songObj.optString("artist", "Vintage Melodies")
+                val artist = songObj.optString("artist", "")
                 val folder = songObj.optString("folder", "Songs")
-                val album = songObj.optString("album", "Cloudflare R2: $folder")
+                val album = songObj.optString("album", "")
                 val year = songObj.optString("year", "")
                 val mediaUrl = songObj.optString("audio_url", songObj.optString("media_url", ""))
                 val artworkUrl = songObj.optString("artwork_url", "")

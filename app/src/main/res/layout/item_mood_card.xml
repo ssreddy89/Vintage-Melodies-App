@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/card_root_container"
     android:layout_width="148dp"
     android:layout_height="wrap_content"
     android:layout_marginEnd="12dp"
@@ -20,7 +21,7 @@
             android:src="@drawable/ic_vintage_player_art_2"
             app:shapeAppearanceOverlay="@style/RoundedImageCorner12" />
 
-        <!-- Prominent Language Badge Tag over Image (Item 6) -->
+        <!-- Prominent Language Badge Tag over Image -->
         <TextView
             android:id="@+id/card_lang_badge"
             android:layout_width="wrap_content"
@@ -36,6 +37,53 @@
             android:textColor="@color/amber_light"
             android:textSize="10sp"
             android:textStyle="bold" />
+
+        <!-- Playing Badge Overlay -->
+        <LinearLayout
+            android:id="@+id/card_playing_indicator"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|start"
+            android:layout_margin="6dp"
+            android:background="@drawable/bg_pill_button_playing"
+            android:paddingStart="7dp"
+            android:paddingTop="3dp"
+            android:paddingEnd="7dp"
+            android:paddingBottom="3dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/card_playing_icon"
+                android:layout_width="12dp"
+                android:layout_height="12dp"
+                android:src="@drawable/ic_equalizer"
+                android:tint="@color/amber_accent" />
+
+            <TextView
+                android:id="@+id/card_playing_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:text="PLAYING"
+                android:textColor="@color/amber_accent"
+                android:textSize="9sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Play / Pause Icon Button for Scroll Playlist Card (Requirement 4) -->
+        <ImageButton
+            android:id="@+id/btn_mood_card_play"
+            android:layout_width="34dp"
+            android:layout_height="34dp"
+            android:layout_gravity="bottom|end"
+            android:layout_margin="6dp"
+            android:background="@drawable/bg_circle_button"
+            android:src="@drawable/ic_play_arrow"
+            android:tint="@color/text_primary"
+            android:contentDescription="Play Playlist"
+            android:padding="7dp" />
     </FrameLayout>
 
     <TextView

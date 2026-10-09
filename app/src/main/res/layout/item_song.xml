@@ -1,20 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/song_item_container"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="16dp"
+    android:paddingStart="14dp"
     android:paddingTop="10dp"
-    android:paddingEnd="16dp"
+    android:paddingEnd="14dp"
     android:paddingBottom="10dp"
-    android:background="?attr/selectableItemBackground">
+    android:background="@drawable/bg_song_item_normal">
 
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/song_item_art"
-        android:layout_width="44dp"
-        android:layout_height="44dp"
+        android:layout_width="46dp"
+        android:layout_height="46dp"
         android:scaleType="centerCrop"
         android:src="@drawable/vm_art_village"
         app:shapeAppearanceOverlay="@style/RoundedImageCorner12" />
@@ -24,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_weight="1"
         android:layout_marginStart="12dp"
+        android:layout_marginEnd="6dp"
         android:orientation="vertical">
 
         <TextView
@@ -49,6 +51,20 @@
             android:ellipsize="end" />
     </LinearLayout>
 
+    <!-- Direct Play / Pause Control Button right in Song List (Point 3) -->
+    <ImageButton
+        android:id="@+id/btn_song_item_play_pause"
+        android:layout_width="34dp"
+        android:layout_height="34dp"
+        android:layout_marginEnd="4dp"
+        android:background="@drawable/bg_circle_button"
+        android:src="@drawable/ic_pause"
+        android:tint="@color/amber_accent"
+        android:padding="7dp"
+        android:visibility="gone"
+        android:contentDescription="Play or Pause Song" />
+
+    <!-- Three Dots Menu Button -->
     <ImageView
         android:id="@+id/song_item_more"
         android:layout_width="28dp"

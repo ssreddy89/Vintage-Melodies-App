@@ -57,11 +57,8 @@ class MusicPlaybackService : Service() {
             currentArtworkBitmap = customBitmap
             val intent = Intent(context, MusicPlaybackService::class.java).apply {
                 putExtra(EXTRA_SONG_TITLE, song?.title ?: "Vintage Melodies")
-                val subtitle = when {
-                    song?.year?.isNotBlank() == true -> "${song.artist} • ${song.year}"
-                    song?.album?.isNotBlank() == true && !song.album.startsWith("Folder:") && !song.album.startsWith("Cloudflare R2:") -> "${song.artist} • ${song.album}"
-                    else -> song?.artist ?: "Classic Music"
-                }
+                val details = song?.getDetailsInfo() ?: ""
+                val subtitle = if (details.isNotBlank()) details else "Vintage Melodies"
                 putExtra(EXTRA_SONG_ARTIST, subtitle)
                 putExtra(EXTRA_PLAYLIST_NAME, playlistName)
                 putExtra(EXTRA_IS_PLAYING, isPlaying)

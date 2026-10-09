@@ -238,6 +238,8 @@ class AudioPlayerManager(private val context: Context) {
 
     fun getCurrentPlaylist(): List<Song> = currentPlaylist
 
+    fun getQueue(): List<Song> = currentPlaylist
+
     private fun cleanupPlayer() {
         handler.removeCallbacks(progressRunnable)
         isPreparing = false
@@ -312,6 +314,14 @@ class AudioPlayerManager(private val context: Context) {
             }
         } catch (e: Exception) {
             e.printStackTrace()
+        }
+    }
+
+    fun getAudioSessionId(): Int {
+        return try {
+            mediaPlayer?.audioSessionId ?: 0
+        } catch (e: Exception) {
+            0
         }
     }
 

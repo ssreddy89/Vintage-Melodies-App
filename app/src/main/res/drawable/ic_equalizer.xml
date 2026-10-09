@@ -3,7 +3,16 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
+    <!-- Channel 1 Track & Knob -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M10,20h4V4h-4v16zm-6,0h4v-8H4v8zM16,9v11h4V9h-4z"/>
+        android:pathData="M4,3h2v18H4zM2,8h6v3H2z"/>
+    <!-- Channel 2 Track & Knob -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M11,3h2v18h-2zM9,14h6v3H9z"/>
+    <!-- Channel 3 Track & Knob -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M18,3h2v18h-2zM16,6h6v3h-6z"/>
 </vector>

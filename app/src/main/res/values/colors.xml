@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Vintage Melodies Brand Colors (Extracted from 1.jfif & 4.jfif) -->
-    <color name="dark_espresso">#FF15200E</color>
-    <color name="dark_background">#FF141D0D</color>
-    <color name="card_background">#991C2B14</color>
-    <color name="card_border">#FF4F752C</color>
-    <color name="amber_accent">#FFA4CD5C</color>
-    <color name="warm_gold">#FFC6EA7C</color>
-    <color name="amber_light">#FFE4F5BF</color>
-    <color name="theme_teal">#FF8FCBDE</color>
+    <!-- Vintage Melodies Brand Colors (#4caad3 Ocean Sky Theme) -->
+    <color name="dark_espresso">#FF0D1B2A</color>
+    <color name="dark_background">#FF0A131C</color>
+    <color name="card_background">#CC0F1E2E</color>
+    <color name="card_border">#664CAAD3</color>
+    <color name="amber_accent">#FF4CAAD3</color>
+    <color name="warm_gold">#FF82C8E5</color>
+    <color name="amber_light">#FFD4EEF9</color>
+    <color name="theme_teal">#FF4CAAD3</color>
     <color name="text_primary">#FFFFFFFF</color>
-    <color name="text_secondary">#D9C6EA7C</color>
-    <color name="text_muted">#B3FFFFFF</color>
-    <color name="splash_background">#FF121A0C</color>
+    <color name="text_secondary">#D982C8E5</color>
+    <color name="text_muted">#B3D4EEF9</color>
+    <color name="splash_background">#FF0A141D</color>
     <color name="error_red">#FFFF6B6B</color>
-    <color name="loading_overlay">#CC121A0C</color>
+    <color name="loading_overlay">#CC0A141D</color>
 
     <!-- Additional UI Colors matching theme -->
-    <color name="player_bar_bg">#8014200E</color>
-    <color name="input_bg">#40000000</color>
-    <color name="input_border">#804F752C</color>
+    <color name="player_bar_bg">#D90A1521</color>
+    <color name="input_bg">#6609141F</color>
+    <color name="input_border">#664CAAD3</color>
     <color name="input_text">#FFFFFFFF</color>
-    <color name="input_hint">#80FFFFFF</color>
-    <color name="divider_color">#33A4CD5C</color>
-    <color name="item_hover">#33A4CD5C</color>
-    <color name="action_btn_bg">#402D4219</color>
-    <color name="badge_bg">#33A4CD5C</color>
+    <color name="input_hint">#80D4EEF9</color>
+    <color name="divider_color">#334CAAD3</color>
+    <color name="item_hover">#334CAAD3</color>
+    <color name="action_btn_bg">#401A384D</color>
+    <color name="badge_bg">#334CAAD3</color>
 
-    <!-- Glowing Semi-Transparent Neon Player (Themed from 1.jfif & 4.jfif) -->
-    <color name="neon_amber_glow">#FFC6EA7C</color>
-    <color name="neon_amber_outer_shadow">#50A4CD5C</color>
-    <color name="neon_amber_deep_shadow">#253C6120</color>
-    <color name="neon_border">#FFC6EA7C</color>
-    <color name="neon_player_card_bg">#8014200E</color>
-    <color name="admin_badge_green">#00E676</color>
+    <!-- Glowing Semi-Transparent Neon Player (#4caad3) -->
+    <color name="neon_amber_glow">#FF4CAAD3</color>
+    <color name="neon_amber_outer_shadow">#664CAAD3</color>
+    <color name="neon_amber_deep_shadow">#33154866</color>
+    <color name="neon_border">#FF4CAAD3</color>
+    <color name="neon_player_card_bg">#D90D1A26</color>
+    <color name="admin_badge_green">#FF4CAAD3</color>
     <color name="white">#FFFFFFFF</color>
     <color name="player_focus_cyan">#FF4CAAD3</color>
     <color name="player_ripple_cyan">#664CAAD3</color>
